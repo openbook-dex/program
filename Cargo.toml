@@ -2,7 +2,6 @@
 members = [
     "assert-owner",
     "common",
-    "common/tests",
     "context",
     "dex/crank",
     "pool",

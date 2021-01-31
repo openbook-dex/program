@@ -92,8 +92,5 @@ Instructions can be found [here](https://solana-labs.github.io/solana-web3.js/).
 * `context`: Global environment used by Serum crates, read from a configuration file.
 * `dex`: Serum DEX program and client utility.
 * `docker`: Docker image definitions.
-* `lockup`: Serum Lockup program and clients.
 * `pool`: Serum pool protocol.
-* `registry`: Serum staking registry and client.
 * `scripts`: Bash scripts for development.
-* `solana-client-gen`: Proc macro for generating Rust clients from instruction definitions.

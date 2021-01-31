@@ -17,10 +17,7 @@ default = []
 anyhow = "1.0.32"
 clap = { version = "3.0.0-beta.2", features = ["yaml"] }
 crank = { path = "../dex/crank" }
-serum-lockup-cli = { path = "../lockup/cli" }
-serum-registry-cli = { path = "../registry/cli" }
 serum-context = { path = "../context" }
-serum-registry-rewards-cli = { path = "../registry/rewards/cli" }
 
 # Dev feature flag.
 serum-common = { path = "../common", optional = true }
