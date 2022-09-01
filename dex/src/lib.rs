@@ -8,7 +8,7 @@ pub mod error;
 mod tests;
 
 pub mod critbit;
-mod fees;
+pub mod fees;
 pub mod instruction;
 pub mod matching;
 pub mod state;
