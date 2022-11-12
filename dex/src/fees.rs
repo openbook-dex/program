@@ -7,7 +7,7 @@ use proptest_derive::Arbitrary;
 
 mod stable_markets {
     pub mod usdt_usdc {
-        solana_program::declare_id!("77quYg4MGneUdjgXCunt9GgM1usmrxKY31twEy3WHwcS");
+        solana_program::declare_id!("B2na8Awyd7cpC59iEU43FagJAPLigr3AP3s38KM982bu");
     }
     pub mod msol_sol {
         solana_program::declare_id!("5cLrMai1DsLRYc1Nio9qMTicsWtvzjzZfJPXyAoF4t1Z");
