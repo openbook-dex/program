@@ -449,7 +449,8 @@ pub enum MarketInstruction {
     /// 8. `[writable]` coin vault
     /// 9. `[writable]` pc vault
     /// 10. `[]` spl token program
-    /// 11. `[]` (optional) the (M)SRM account used for fee discounts
+    /// 11. `[]` vault signer
+    /// 12. `[]` (optional) the (M)SRM account used for fee discounts
     SendTake(SendTakeInstruction),
     /// 0. `[writable]` OpenOrders
     /// 1. `[signer]` the OpenOrders owner
@@ -1036,6 +1037,63 @@ pub fn sweep_fees(
         AccountMeta::new_readonly(*vault_signer, false),
         AccountMeta::new_readonly(*spl_token_program_id, false),
     ];
+    Ok(Instruction {
+        program_id: *program_id,
+        data,
+        accounts,
+    })
+}
+
+pub fn send_take(
+    market: &Pubkey,
+    request_queue: &Pubkey,
+    event_queue: &Pubkey,
+    market_bids: &Pubkey,
+    market_asks: &Pubkey,
+    coin_wallet: &Pubkey,
+    pc_wallet: &Pubkey,
+    wallet_owner: &Pubkey,
+    coin_vault: &Pubkey,
+    pc_vault: &Pubkey,
+    spl_token_program_id: &Pubkey,
+    vault_signer: &Pubkey,
+    srm_account_referral: Option<&Pubkey>,
+    program_id: &Pubkey,
+    side: Side,
+    limit_price: NonZeroU64,
+    max_coin_qty: NonZeroU64,
+    max_native_pc_qty_including_fees: NonZeroU64,
+    min_coin_qty: u64,
+    min_native_pc_qty: u64,
+    limit: u16,
+) -> Result<Instruction, DexError> {
+    let data = MarketInstruction::SendTake(SendTakeInstruction {
+        side,
+        limit_price,
+        max_coin_qty,
+        max_native_pc_qty_including_fees,
+        min_coin_qty,
+        min_native_pc_qty,
+        limit,
+    })
+    .pack();
+    let mut accounts = vec![
+        AccountMeta::new(*market, false),
+        AccountMeta::new(*request_queue, false),
+        AccountMeta::new(*event_queue, false),
+        AccountMeta::new(*market_bids, false),
+        AccountMeta::new(*market_asks, false),
+        AccountMeta::new(*coin_wallet, false),
+        AccountMeta::new(*pc_wallet, false),
+        AccountMeta::new_readonly(*wallet_owner, true),
+        AccountMeta::new(*coin_vault, false),
+        AccountMeta::new(*pc_vault, false),
+        AccountMeta::new_readonly(*spl_token_program_id, false),
+        AccountMeta::new_readonly(*vault_signer, false),
+    ];
+    if let Some(key) = srm_account_referral {
+        accounts.push(AccountMeta::new_readonly(*key, false))
+    }
     Ok(Instruction {
         program_id: *program_id,
         data,
