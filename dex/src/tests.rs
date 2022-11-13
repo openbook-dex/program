@@ -343,8 +343,8 @@ fn test_new_order() {
 
     {
         let market = Market::load(&accounts.market, &dex_program_id, false).unwrap();
-        assert_eq!(identity(market.referrer_rebates_accrued), 32);
-        assert_eq!(identity(market.pc_fees_accrued), 128);
+        assert_eq!(identity(market.referrer_rebates_accrued), 8);
+        assert_eq!(identity(market.pc_fees_accrued), 32);
         assert_eq!(
             market.pc_fees_accrued + market.pc_deposits_total + market.referrer_rebates_accrued,
             520_000
@@ -365,8 +365,8 @@ fn test_new_order() {
             .unwrap();
         assert_eq!(identity(open_orders_seller.native_coin_free), 0);
         assert_eq!(identity(open_orders_seller.native_coin_total), 0);
-        assert_eq!(identity(open_orders_seller.native_pc_free), 399840);
-        assert_eq!(identity(open_orders_seller.native_pc_total), 399840);
+        assert_eq!(identity(open_orders_seller.native_pc_free), 399_960);
+        assert_eq!(identity(open_orders_seller.native_pc_total), 399_960);
     }
 
     {
@@ -386,8 +386,8 @@ fn test_new_order() {
 
     {
         let market = Market::load(&accounts.market, &dex_program_id, false).unwrap();
-        assert_eq!(identity(market.referrer_rebates_accrued), 32);
-        assert_eq!(identity(market.pc_fees_accrued), 128);
+        assert_eq!(identity(market.referrer_rebates_accrued), 8);
+        assert_eq!(identity(market.pc_fees_accrued), 32);
         assert_eq!(
             market.pc_deposits_total + market.pc_fees_accrued + market.referrer_rebates_accrued,
             520_000
@@ -408,8 +408,8 @@ fn test_new_order() {
             .unwrap();
         assert_eq!(identity(open_orders_seller.native_coin_free), 0);
         assert_eq!(identity(open_orders_seller.native_coin_total), 0);
-        assert_eq!(identity(open_orders_seller.native_pc_free), 399_840);
-        assert_eq!(identity(open_orders_seller.native_pc_total), 399_840);
+        assert_eq!(identity(open_orders_seller.native_pc_free), 399_960);
+        assert_eq!(identity(open_orders_seller.native_pc_total), 399_960);
     }
 }
 

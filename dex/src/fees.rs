@@ -90,28 +90,8 @@ const fn rebate_tenth_of_bps(tenth_of_bps: u64) -> U64F64 {
 
 impl FeeTier {
     #[inline]
-    pub fn from_srm_and_msrm_balances(market: &Pubkey, srm_held: u64, msrm_held: u64) -> FeeTier {
-        let one_srm = 1_000_000;
-
-        if market == &stable_markets::usdt_usdc::ID
-            || market == &stable_markets::msol_sol::ID
-            || market == &stable_markets::ust_usdc::ID
-            || market == &stable_markets::ust_usdt::ID
-            || market == &stable_markets::stsol_sol::ID
-            || market == &stable_markets::usdh_usdc::ID
-        {
-            return FeeTier::Stable;
-        }
-
-        match () {
-            () if msrm_held >= 1 => FeeTier::MSRM,
-            () if srm_held >= one_srm * 1_000_000 => FeeTier::SRM6,
-            () if srm_held >= one_srm * 100_000 => FeeTier::SRM5,
-            () if srm_held >= one_srm * 10_000 => FeeTier::SRM4,
-            () if srm_held >= one_srm * 1_000 => FeeTier::SRM3,
-            () if srm_held >= one_srm * 100 => FeeTier::SRM2,
-            () => FeeTier::Base,
-        }
+    pub fn from_srm_and_msrm_balances(_market: &Pubkey, _srm_held: u64, _msrm_held: u64) -> FeeTier {
+        FeeTier::Stable
     }
 
     #[inline]
