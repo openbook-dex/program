@@ -1361,7 +1361,7 @@ pub struct FillEventLog {
     owner: Pubkey,
     owner_slot: u8,
     fee_tier: u8,
-    client_order_id: Option<NonZeroU64>,
+    client_order_id: Option<u64>,
 }
 
 #[derive(Copy, Clone)]
@@ -3054,7 +3054,10 @@ impl State {
                         owner: Pubkey::new(cast_slice(&identity(owner) as &[_])),
                         owner_slot,
                         fee_tier: fee_tier as u8,
-                        client_order_id,
+                        client_order_id: match client_order_id {
+                            Some(i) => Some(u64::from(i)),
+                            None => None,
+                        },
                     });
                 }
                 EventView::Out {
