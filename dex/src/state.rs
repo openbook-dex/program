@@ -1362,6 +1362,7 @@ pub struct FillEventLog {
     owner_slot: u8,
     fee_tier: u8,
     client_order_id: Option<u64>,
+    referrer_rebate: Option<u64>,
 }
 
 #[derive(Copy, Clone)]
@@ -3028,10 +3029,15 @@ impl State {
                         }
                         _ => (),
                     };
-                    if !maker {
+
+                    let referrer_rebate = if !maker {
                         let referrer_rebate = fees::referrer_rebate(native_fee_or_rebate);
                         open_orders.referrer_rebates_accrued += referrer_rebate;
-                    }
+                        Some(referrer_rebate)
+                    } else {
+                        None
+                    };
+
                     if let Some(client_id) = client_order_id {
                         debug_assert_eq!(
                             client_id.get(),
@@ -3054,10 +3060,8 @@ impl State {
                         owner: Pubkey::new(cast_slice(&identity(owner) as &[_])),
                         owner_slot,
                         fee_tier: fee_tier as u8,
-                        client_order_id: match client_order_id {
-                            Some(i) => Some(u64::from(i)),
-                            None => None,
-                        },
+                        client_order_id: client_order_id.map(|i| i.get()),
+                        referrer_rebate
                     });
                 }
                 EventView::Out {
