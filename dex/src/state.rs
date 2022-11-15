@@ -23,7 +23,7 @@ use spl_token::error::TokenError;
 
 use crate::{
     critbit::Slab,
-    error::{DexErrorCode, DexResult, SourceFileId, DexError},
+    error::{DexError, DexErrorCode, DexResult, SourceFileId},
     fees::{self, FeeTier},
     instruction::{
         disable_authority, fee_sweeper, msrm_token, srm_token, CancelOrderInstructionV2,
@@ -32,6 +32,8 @@ use crate::{
     },
     matching::{OrderBookState, OrderType, RequestProceeds, Side},
 };
+
+use anchor_lang::prelude::{borsh, emit, event, AnchorDeserialize, AnchorSerialize};
 
 declare_check_assert_macros!(SourceFileId::State);
 
@@ -1344,6 +1346,23 @@ impl EventView {
             &EventView::Fill { side, .. } | &EventView::Out { side, .. } => side,
         }
     }
+}
+
+#[event]
+pub struct FillEventLog {
+    market: Pubkey,
+    open_orders: Pubkey,
+    bid: bool,
+    maker: bool,
+    native_qty_paid: u64,
+    native_qty_received: u64,
+    native_fee_or_rebate: u64,
+    order_id: u128,
+    owner: Pubkey,
+    owner_slot: u8,
+    fee_tier: u8,
+    client_order_id: Option<u64>,
+    referrer_rebate: Option<u64>,
 }
 
 #[derive(Copy, Clone)]
@@ -2912,7 +2931,7 @@ impl State {
                         }
                         return Err(err);
                     }
-                    _ => return Err(err)
+                    _ => return Err(err),
                 }
             }
         }
@@ -2960,15 +2979,20 @@ impl State {
             let owner: [u64; 4] = event.owner;
             let owner_index: Result<usize, usize> = open_orders_accounts
                 .binary_search_by_key(&owner, |account_info| account_info.key.to_aligned_bytes());
-            let mut open_orders: RefMut<OpenOrders> = match owner_index {
+            let mut open_orders: RefMut<OpenOrders>;
+            let open_orders_pubkey: &Pubkey;
+            match owner_index {
                 Err(_) => break,
-                Ok(i) => market.load_orders_mut(
-                    &open_orders_accounts[i],
-                    None,
-                    program_id,
-                    None,
-                    None,
-                )?,
+                Ok(i) => {
+                    open_orders = market.load_orders_mut(
+                        &open_orders_accounts[i],
+                        None,
+                        program_id,
+                        None,
+                        None,
+                    )?;
+                    open_orders_pubkey = &open_orders_accounts[i].key;
+                }
             };
 
             check_assert!(event.owner_slot < 128)?;
@@ -2985,9 +3009,9 @@ impl State {
                     native_qty_paid,
                     native_qty_received,
                     native_fee_or_rebate,
-                    fee_tier: _,
-                    order_id: _,
-                    owner: _,
+                    fee_tier,
+                    order_id,
+                    owner,
                     owner_slot,
                     client_order_id,
                 } => {
@@ -3005,16 +3029,40 @@ impl State {
                         }
                         _ => (),
                     };
-                    if !maker {
+
+                    let referrer_rebate = if !maker {
                         let referrer_rebate = fees::referrer_rebate(native_fee_or_rebate);
                         open_orders.referrer_rebates_accrued += referrer_rebate;
-                    }
+                        Some(referrer_rebate)
+                    } else {
+                        None
+                    };
+
                     if let Some(client_id) = client_order_id {
                         debug_assert_eq!(
                             client_id.get(),
                             identity(open_orders.client_order_ids[owner_slot as usize])
                         );
                     }
+
+                    emit!(FillEventLog {
+                        market: market.pubkey(),
+                        open_orders: *open_orders_pubkey,
+                        bid: match side {
+                            Side::Bid => true,
+                            Side::Ask => false,
+                        },
+                        maker,
+                        native_qty_paid,
+                        native_qty_received,
+                        native_fee_or_rebate,
+                        order_id,
+                        owner: Pubkey::new(cast_slice(&identity(owner) as &[_])),
+                        owner_slot,
+                        fee_tier: fee_tier as u8,
+                        client_order_id: client_order_id.map(|i| i.get()),
+                        referrer_rebate
+                    });
                 }
                 EventView::Out {
                     side,
