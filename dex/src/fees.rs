@@ -27,8 +27,9 @@ pub enum FeeTier {
     _SRM4,
     _SRM5,
     _SRM6,
-    Flagship,
+    _MSRM,
     Stable,
+    Flagship,
 }
 
 #[repr(transparent)]
