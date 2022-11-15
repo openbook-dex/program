@@ -16,6 +16,7 @@ default = ["program"]
 no-entrypoint = []
 
 [dependencies]
+anchor-lang = ">=0.24.2"
 solana-program = "1.6.18"
 spl-token = { version = "3.0.0-pre1", features = ["no-entrypoint"] }
 serde = "1.0.114"
