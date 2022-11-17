@@ -1,31 +1,30 @@
-# serum-dex
+# Openbook DEX
 
 ## Deploying the DEX
 
-Using the `do.sh` script from the repository's top level directory,
+Run these commands from the repository's dex directory.
 
 ### Run unit tests
 
 ```bash
-./do.sh test dex
+cargo test
 ```
 
 ### Compile the dex binary
 
 ```bash
-./do.sh build dex
+cargo build --relase dex
 ```
 
 ### Deploy the dex to the configured solana cluster
 
 ```bash
-DEX_PROGRAM_ID="$(solana deploy dex/target/bpfel-unknown-unknown/release/serum_dex.so | jq .programId -r)"
+DEX_PROGRAM_ID="$(solana deploy ./target/bpfel-unknown-unknown/release/serum_dex.so | jq .programId -r)"
 ```
 
 ## Run the fuzz tests
 
 ```bash
-cd dex
 cargo install cargo-fuzz
 cargo fuzz run multiple_orders
 ```
@@ -65,10 +64,9 @@ source $HOME/.cargo/env
 curl -sSf https://raw.githubusercontent.com/solana-labs/solana/v1.4.14/install/solana-install-init.sh | sh -s - v1.4.14
 export PATH="/home/ubuntu/.local/share/solana/install/active_release/bin:$PATH"
 
-git clone https://github.com/project-serum/serum-dex
-cd serum-dex
-./do.sh update
-./do.sh build dex
+git clone https://github.com/openbook-dex/program
+cd dex
+cargo build --release
 
 # run a solana cluster. in a new shell:
 git clone https://github.com/solana-labs/solana --branch v1.4.14
