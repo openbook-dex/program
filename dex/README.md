@@ -2,7 +2,7 @@
 
 ## Deploying the DEX
 
-Run these commands from the repository's dex subdirectory directory,
+Run these commands from the repository's dex directory,
 
 ### Run unit tests
 
