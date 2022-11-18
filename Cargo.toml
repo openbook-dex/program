@@ -4,10 +4,6 @@ members = [
     "common",
     "dex/crank",
     "dex/permissioned",
-    "pool",
-    "pool/schema",
-    "pool/examples/admin-controlled",
-    "pool/examples/simple",
 ]
 exclude = [
     "dex",
