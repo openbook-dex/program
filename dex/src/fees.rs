@@ -5,24 +5,15 @@ use std::convert::TryInto;
 #[cfg(test)]
 use proptest_derive::Arbitrary;
 
+mod flagship_markets {
+    pub mod sol_usdc {
+        solana_program::declare_id!("8BnEgHoWFysVcuFFX7QztDmzuH8r5ZFvyP3sYwn1XTh6");
+    }
+}
+
 mod stable_markets {
     pub mod usdt_usdc {
         solana_program::declare_id!("B2na8Awyd7cpC59iEU43FagJAPLigr3AP3s38KM982bu");
-    }
-    pub mod msol_sol {
-        solana_program::declare_id!("5cLrMai1DsLRYc1Nio9qMTicsWtvzjzZfJPXyAoF4t1Z");
-    }
-    pub mod ust_usdc {
-        solana_program::declare_id!("EERNEEnBqdGzBS8dd46wwNY5F2kwnaCQ3vsq2fNKGogZ");
-    }
-    pub mod ust_usdt {
-        solana_program::declare_id!("8sFf9TW3KzxLiBXcDcjAxqabEsRroo4EiRr3UG1xbJ9m");
-    }
-    pub mod stsol_sol {
-        solana_program::declare_id!("2iDSTGhjJEiRxNaLF27CY6daMYPs5hgYrP2REHd5YD62");
-    }
-    pub mod usdh_usdc {
-        solana_program::declare_id!("CaFjigEgJdtGPxQxRjneA1hzNcY5MsHoAAL6Et67QrC5");
     }
 }
 
@@ -31,13 +22,14 @@ mod stable_markets {
 #[repr(u8)]
 pub enum FeeTier {
     Base,
-    SRM2,
-    SRM3,
-    SRM4,
-    SRM5,
-    SRM6,
-    MSRM,
+    _SRM2,
+    _SRM3,
+    _SRM4,
+    _SRM5,
+    _SRM6,
+    _MSRM,
     Stable,
+    Flagship,
 }
 
 #[repr(transparent)]
@@ -83,61 +75,44 @@ const fn fee_tenth_of_bps(tenth_of_bps: u64) -> U64F64 {
     U64F64(((tenth_of_bps as u128) << 64) / 100_000)
 }
 
-#[inline(always)]
-const fn rebate_tenth_of_bps(tenth_of_bps: u64) -> U64F64 {
-    U64F64(fee_tenth_of_bps(tenth_of_bps).0 + 1)
-}
-
 impl FeeTier {
     #[inline]
-    pub fn from_srm_and_msrm_balances(market: &Pubkey, srm_held: u64, msrm_held: u64) -> FeeTier {
-        let one_srm = 1_000_000;
+    pub fn from_srm_and_msrm_balances(market: &Pubkey, _srm_held: u64, _msrm_held: u64) -> FeeTier {
+        if market == &flagship_markets::sol_usdc::ID {
+            return FeeTier::Flagship;
+        }
 
-        if market == &stable_markets::usdt_usdc::ID
-            || market == &stable_markets::msol_sol::ID
-            || market == &stable_markets::ust_usdc::ID
-            || market == &stable_markets::ust_usdt::ID
-            || market == &stable_markets::stsol_sol::ID
-            || market == &stable_markets::usdh_usdc::ID
-        {
+        if market == &stable_markets::usdt_usdc::ID {
             return FeeTier::Stable;
         }
 
-        match () {
-            () if msrm_held >= 1 => FeeTier::MSRM,
-            () if srm_held >= one_srm * 1_000_000 => FeeTier::SRM6,
-            () if srm_held >= one_srm * 100_000 => FeeTier::SRM5,
-            () if srm_held >= one_srm * 10_000 => FeeTier::SRM4,
-            () if srm_held >= one_srm * 1_000 => FeeTier::SRM3,
-            () if srm_held >= one_srm * 100 => FeeTier::SRM2,
-            () => FeeTier::Base,
+        FeeTier::Base
+    }
+
+    fn maker_rate(self) -> U64F64 {
+        use FeeTier::*;
+        match self {
+            Stable => fee_tenth_of_bps(5),
+            Flagship => fee_tenth_of_bps(20),
+            Base | _ => fee_tenth_of_bps(100),
         }
     }
 
     #[inline]
     pub fn maker_rebate(self, pc_qty: u64) -> u64 {
-        rebate_tenth_of_bps(0).mul_u64(pc_qty).floor()
+        let rate = self.maker_rate();
+        rate.mul_u64(pc_qty).floor()
     }
 
     fn taker_rate(self) -> U64F64 {
-        use FeeTier::*;
-        match self {
-            Base => fee_tenth_of_bps(40),
-            SRM2 => fee_tenth_of_bps(39),
-            SRM3 => fee_tenth_of_bps(38),
-            SRM4 => fee_tenth_of_bps(36),
-            SRM5 => fee_tenth_of_bps(34),
-            SRM6 => fee_tenth_of_bps(32),
-            MSRM => fee_tenth_of_bps(30),
-            Stable => fee_tenth_of_bps(10),
-        }
+        self.maker_rate().mul_u64(2)
     }
 
     #[inline]
     pub fn taker_fee(self, pc_qty: u64) -> u64 {
         let rate = self.taker_rate();
-        let exact_fee: U64F64 = rate.mul_u64(pc_qty);
-        exact_fee.floor() + ((exact_fee.frac_part() != 0) as u64)
+        let exact_fee = rate.mul_u64(pc_qty);
+        exact_fee.floor() + (exact_fee.frac_part() != 0) as u64
     }
 
     #[inline]
@@ -152,7 +127,7 @@ impl FeeTier {
 
 #[inline]
 pub fn referrer_rebate(amount: u64) -> u64 {
-    amount / 5
+    amount / 2
 }
 
 #[cfg(test)]
@@ -162,14 +137,13 @@ mod tests {
 
     proptest! {
         #[test]
-        fn positive_net_fees(tt: FeeTier, mt: FeeTier, qty in 1..=std::u64::MAX) {
-            let fee = tt.taker_fee(qty);
-            let rebate = mt.maker_rebate(qty) + referrer_rebate(fee);
-            assert!(fee > rebate);
-            let net_bps_u64f64 = (fee - rebate) as u128 * 100_000;
-            let three_bps = (qty as u128) * 3;
-            let dust_qty_u64f64 = 1 << 32;
-            assert!(net_bps_u64f64 + dust_qty_u64f64 > three_bps, "{:x}, {:x}, {:x}", qty, net_bps_u64f64, three_bps);
+        fn positive_net_fees(ft: FeeTier, qty in 1..=std::u64::MAX) {
+            let taker_fee = ft.taker_fee(qty);
+            let maker_rebate = ft.maker_rebate(qty);
+            let referrer_rebate = referrer_rebate(taker_fee);
+
+            assert!(referrer_rebate >= maker_rebate, "{:?}: {:?} >= {:?}", qty, referrer_rebate, maker_rebate);
+            assert!(taker_fee >= maker_rebate + referrer_rebate, "{:?}: {:?} >= {:?} + {:?}", qty, taker_fee, maker_rebate, referrer_rebate);
         }
 
         #[test]

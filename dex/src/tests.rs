@@ -343,8 +343,8 @@ fn test_new_order() {
 
     {
         let market = Market::load(&accounts.market, &dex_program_id, false).unwrap();
-        assert_eq!(identity(market.referrer_rebates_accrued), 32);
-        assert_eq!(identity(market.pc_fees_accrued), 128);
+        assert_eq!(identity(market.referrer_rebates_accrued), 400);
+        assert_eq!(identity(market.pc_fees_accrued), 1);
         assert_eq!(
             market.pc_fees_accrued + market.pc_deposits_total + market.referrer_rebates_accrued,
             520_000
@@ -365,8 +365,8 @@ fn test_new_order() {
             .unwrap();
         assert_eq!(identity(open_orders_seller.native_coin_free), 0);
         assert_eq!(identity(open_orders_seller.native_coin_total), 0);
-        assert_eq!(identity(open_orders_seller.native_pc_free), 399840);
-        assert_eq!(identity(open_orders_seller.native_pc_total), 399840);
+        assert_eq!(identity(open_orders_seller.native_pc_free), 399200);
+        assert_eq!(identity(open_orders_seller.native_pc_total), 399200);
     }
 
     {
@@ -386,8 +386,8 @@ fn test_new_order() {
 
     {
         let market = Market::load(&accounts.market, &dex_program_id, false).unwrap();
-        assert_eq!(identity(market.referrer_rebates_accrued), 32);
-        assert_eq!(identity(market.pc_fees_accrued), 128);
+        assert_eq!(identity(market.referrer_rebates_accrued), 400);
+        assert_eq!(identity(market.pc_fees_accrued), 1);
         assert_eq!(
             market.pc_deposits_total + market.pc_fees_accrued + market.referrer_rebates_accrued,
             520_000
@@ -400,16 +400,16 @@ fn test_new_order() {
             .unwrap();
         assert_eq!(identity(open_orders_buyer.native_coin_free), 4_000);
         assert_eq!(identity(open_orders_buyer.native_coin_total), 4_000);
-        assert_eq!(identity(open_orders_buyer.native_pc_free), 20_000);
-        assert_eq!(identity(open_orders_buyer.native_pc_total), 120_000);
+        assert_eq!(identity(open_orders_buyer.native_pc_free), 20_399);
+        assert_eq!(identity(open_orders_buyer.native_pc_total), 120_399);
         let open_orders_seller = Market::load(&accounts.market, &dex_program_id, false)
             .unwrap()
             .load_orders_mut(&orders_account_seller, None, &dex_program_id, None, None)
             .unwrap();
         assert_eq!(identity(open_orders_seller.native_coin_free), 0);
         assert_eq!(identity(open_orders_seller.native_coin_total), 0);
-        assert_eq!(identity(open_orders_seller.native_pc_free), 399_840);
-        assert_eq!(identity(open_orders_seller.native_pc_total), 399_840);
+        assert_eq!(identity(open_orders_seller.native_pc_free), 399_200);
+        assert_eq!(identity(open_orders_seller.native_pc_total), 399_200);
     }
 }
 
@@ -421,6 +421,12 @@ fn test_cancel_orders() {
     let accounts = setup_market(&mut rng, &bump);
 
     let dex_program_id = accounts.market.owner;
+
+    {
+        let market = Market::load(&accounts.market, &dex_program_id, false).unwrap();
+        assert_eq!(identity(market.pc_fees_accrued), 0);
+        assert_eq!(identity(market.pc_deposits_total), 0);
+    }
 
     let owner = new_sol_account(&mut rng, 1_000_000_000, &bump);
     let orders_account =

@@ -944,7 +944,7 @@ mod tests {
                         };
                         let owner = rng.gen();
                         let qty = rng.gen();
-                        let leaf = LeafNode::new(offset, key, owner, qty, FeeTier::SRM5, 5);
+                        let leaf = LeafNode::new(offset, key, owner, qty, FeeTier::Base, 5);
 
                         println!("Insert {:x}", key);
 

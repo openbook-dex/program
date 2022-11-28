@@ -1203,6 +1203,7 @@ mod fuzzing {
                 client_order_id: value.client_order_id,
                 self_trade_behavior: value.self_trade_behavior,
                 limit: value.limit,
+                max_ts: i64::MAX,
             })
         }
     }
