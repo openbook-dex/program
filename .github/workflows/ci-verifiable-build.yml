@@ -5,7 +5,6 @@ on:
       - "v*"
 
 env:
-  CARGO_TERM_COLOR: always
   # Anchor 0.25.0 (latest) does not include x86_64 binary, use older version until resolved https://github.com/coral-xyz/anchor/issues/2076
   ANCHOR_CLI_VERSION: 0.24.2
   # TODO: Anchor build image version is set manually. Should read from Anchor.toml once this version is decided upon
