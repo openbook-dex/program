@@ -13,7 +13,7 @@ env:
 
 defaults:
   run:
-    working-directory: ./
+    working-directory: ./dex
 
 jobs:
   build:
@@ -30,11 +30,12 @@ jobs:
 
       - name: Verifiable Build
         run: |
-          cd dex
           echo "APP_NAME=$(cargo metadata --no-deps --format-version 1 | jq --raw-output '.packages[0].name')" >> $GITHUB_ENV 
           anchor build --docker-image projectserum/build:v${{ env.ANCHOR_BUILD_IMAGE_VERSION }} --verifiable
+
+      - name: Generate Checksum
+        run: |
           echo "CHECKSUM=$(sha256sum ./target/verifiable/${{ env.APP_NAME }}.so | head -c 64)" >> $GITHUB_ENV
-          cd ../
 
       - name: Create Release
         id: create_release
