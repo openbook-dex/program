@@ -1,0 +1,58 @@
+name: Verifiable Build
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  # Anchor 0.25.0 (latest) does not include x86_64 binary, use older version until resolved https://github.com/coral-xyz/anchor/issues/2076
+  ANCHOR_CLI_VERSION: 0.24.2
+
+defaults:
+  run:
+    working-directory: ./dex
+
+jobs:
+  build:
+    name: Build Verifiable Artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Anchor CLI
+        run: |
+          npm install -g @project-serum/anchor-cli@${{ env.ANCHOR_CLI_VERSION }}
+          anchor --version
+
+      - name: Verifiable Build
+        run: |
+          echo "APP_NAME=$(cargo metadata --no-deps --format-version 1 | jq --raw-output '.packages[0].name')" >> $GITHUB_ENV 
+          anchor build --verifiable
+
+      - name: Generate Checksum
+        run: |
+          echo "CHECKSUM=$(sha256sum ./target/verifiable/${{ env.APP_NAME }}.so | head -c 64)" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            sha256 checksum: ${{ env.CHECKSUM }}
+            github commit: ${{ github.sha }}
+
+      - name: Upload Build Artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          # default working directory only applies to 'run' steps, hardcoded workspace path for now
+          asset_path: ./dex/target/verifiable/${{ env.APP_NAME }}.so
+          asset_name: ${{ env.APP_NAME }}.so
+          asset_content_type: application/x-sharedlib
