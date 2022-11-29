@@ -7,8 +7,6 @@ on:
 env:
   # Anchor 0.25.0 (latest) does not include x86_64 binary, use older version until resolved https://github.com/coral-xyz/anchor/issues/2076
   ANCHOR_CLI_VERSION: 0.24.2
-  # TODO: Anchor build image version is set manually. Should read from Anchor.toml once this version is decided upon
-  ANCHOR_BUILD_IMAGE_VERSION: 0.25.0
 
 defaults:
   run:
@@ -30,7 +28,7 @@ jobs:
       - name: Verifiable Build
         run: |
           echo "APP_NAME=$(cargo metadata --no-deps --format-version 1 | jq --raw-output '.packages[0].name')" >> $GITHUB_ENV 
-          anchor build --docker-image projectserum/build:v${{ env.ANCHOR_BUILD_IMAGE_VERSION }} --verifiable
+          anchor build --verifiable
 
       - name: Generate Checksum
         run: |
