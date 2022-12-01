@@ -1358,7 +1358,6 @@ pub struct FillEventLog {
     native_qty_received: u64,
     native_fee_or_rebate: u64,
     order_id: u128,
-    owner: Pubkey,
     owner_slot: u8,
     fee_tier: u8,
     client_order_id: Option<u64>,
@@ -2979,20 +2978,15 @@ impl State {
             let owner: [u64; 4] = event.owner;
             let owner_index: Result<usize, usize> = open_orders_accounts
                 .binary_search_by_key(&owner, |account_info| account_info.key.to_aligned_bytes());
-            let mut open_orders: RefMut<OpenOrders>;
-            let open_orders_pubkey: &Pubkey;
-            match owner_index {
+            let mut open_orders: RefMut<OpenOrders> = match owner_index {
                 Err(_) => break,
-                Ok(i) => {
-                    open_orders = market.load_orders_mut(
-                        &open_orders_accounts[i],
-                        None,
-                        program_id,
-                        None,
-                        None,
-                    )?;
-                    open_orders_pubkey = &open_orders_accounts[i].key;
-                }
+                Ok(i) => market.load_orders_mut(
+                    &open_orders_accounts[i],
+                    None,
+                    program_id,
+                    None,
+                    None,
+                )?,
             };
 
             check_assert!(event.owner_slot < 128)?;
@@ -3047,7 +3041,6 @@ impl State {
 
                     emit!(FillEventLog {
                         market: market.pubkey(),
-                        open_orders: *open_orders_pubkey,
                         bid: match side {
                             Side::Bid => true,
                             Side::Ask => false,
@@ -3057,7 +3050,7 @@ impl State {
                         native_qty_received,
                         native_fee_or_rebate,
                         order_id,
-                        owner: Pubkey::new(cast_slice(&identity(owner) as &[_])),
+                        open_orders: Pubkey::new(cast_slice(&identity(owner) as &[_])),
                         owner_slot,
                         fee_tier: fee_tier as u8,
                         client_order_id: client_order_id.map(|i| i.get()),
