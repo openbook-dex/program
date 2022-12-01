@@ -1364,6 +1364,17 @@ pub struct FillEventLog {
     referrer_rebate: Option<u64>,
 }
 
+#[event]
+pub struct OpenOrdersBalanceLog {
+    open_orders: Pubkey,
+    market: Pubkey,
+    native_pc_total: u64,
+    native_coin_total: u64,
+    native_coin_free: u64,
+    native_pc_free: u64,
+    referrer_rebates_accrued: u64,
+}
+
 #[derive(Copy, Clone)]
 #[repr(packed)]
 struct OrderBookStateHeader {
@@ -3039,6 +3050,7 @@ impl State {
                         );
                     }
 
+                    let open_order_pk = Pubkey::new(cast_slice(&identity(owner) as &[_]));
                     emit!(FillEventLog {
                         market: market.pubkey(),
                         bid: match side {
@@ -3050,12 +3062,22 @@ impl State {
                         native_qty_received,
                         native_fee_or_rebate,
                         order_id,
-                        open_orders: Pubkey::new(cast_slice(&identity(owner) as &[_])),
+                        open_orders: open_order_pk,
                         owner_slot,
                         fee_tier: fee_tier as u8,
                         client_order_id: client_order_id.map(|i| i.get()),
                         referrer_rebate
                     });
+
+                    emit!(OpenOrdersBalanceLog {
+                        open_orders: open_order_pk,
+                        market: market.pubkey(),
+                        native_pc_total: open_orders.native_pc_total,
+                        native_coin_total: open_orders.native_coin_total,
+                        native_coin_free: open_orders.native_coin_free,
+                        native_pc_free: open_orders.native_pc_free,
+                        referrer_rebates_accrued: open_orders.referrer_rebates_accrued,
+                    })
                 }
                 EventView::Out {
                     side,
