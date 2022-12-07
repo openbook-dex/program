@@ -94,7 +94,7 @@ impl FeeTier {
         match self {
             Stable => fee_tenth_of_bps(5),
             Flagship => fee_tenth_of_bps(20),
-            Base | _ => fee_tenth_of_bps(100),
+            Base | _ => fee_tenth_of_bps(40),
         }
     }
 
