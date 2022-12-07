@@ -9,6 +9,21 @@ mod flagship_markets {
     pub mod sol_usdc {
         solana_program::declare_id!("8BnEgHoWFysVcuFFX7QztDmzuH8r5ZFvyP3sYwn1XTh6");
     }
+    pub mod msol_usdc {
+        solana_program::declare_id!("9Lyhks5bQQxb9EyyX55NtgKQzpM4WK7JCmeaWuQ5MoXD");
+    }
+    pub mod msol_sol {
+        solana_program::declare_id!("AYhLYoDr6QCtVb5n1M5hsWLG74oB8VEz378brxGTnjjn");
+    }
+    pub mod eth_usdc {
+        solana_program::declare_id!("BbJgE7HZMaDp5NTYvRh5jZSkQPVDTU8ubPFtpogUkEj4");
+    }
+    pub mod scnsol_usdc {
+        solana_program::declare_id!("3vtRgLDesutQdwotnoUuSMuKKj8YJAE85s938mGKfxXZ");
+    }
+    pub mod scnsol_sol {
+        solana_program::declare_id!("2eSZySzRb6w7RrwbgVgrcPYLvtp5v8jBjsp387FbFtNn");
+    }
 }
 
 mod stable_markets {
@@ -78,7 +93,13 @@ const fn fee_tenth_of_bps(tenth_of_bps: u64) -> U64F64 {
 impl FeeTier {
     #[inline]
     pub fn from_srm_and_msrm_balances(market: &Pubkey, _srm_held: u64, _msrm_held: u64) -> FeeTier {
-        if market == &flagship_markets::sol_usdc::ID {
+        if  market == &flagship_markets::sol_usdc ||
+            market == &flagship_markets::msol_usdc::ID ||
+            market == &flagship_markets::msol_sol::ID ||
+            market == &flagship_markets::eth_usdc::ID ||
+            market == &flagship_markets::scnsol_usdc::ID ||
+            market == &flagship_markets::scnsol_sol::ID
+        {
             return FeeTier::Flagship;
         }
 
