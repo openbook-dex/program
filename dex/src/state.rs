@@ -1352,6 +1352,7 @@ impl EventView {
 pub struct FillEventLog {
     market: Pubkey,
     open_orders: Pubkey,
+    open_orders_owner: Pubkey,
     bid: bool,
     maker: bool,
     native_qty_paid: u64,
@@ -1367,6 +1368,7 @@ pub struct FillEventLog {
 #[event]
 pub struct OpenOrdersBalanceLog {
     open_orders: Pubkey,
+    open_orders_owner: Pubkey,
     market: Pubkey,
     native_pc_total: u64,
     native_coin_total: u64,
@@ -3050,7 +3052,9 @@ impl State {
                         );
                     }
 
-                    let open_order_pk = Pubkey::new(cast_slice(&identity(owner) as &[_]));
+                    let open_orders_pk = Pubkey::new(cast_slice(&identity(owner) as &[_]));
+                    let open_orders_owner_pk =
+                        Pubkey::new(cast_slice(&identity(open_orders.owner) as &[_]));
                     emit!(FillEventLog {
                         market: market.pubkey(),
                         bid: match side {
@@ -3062,7 +3066,8 @@ impl State {
                         native_qty_received,
                         native_fee_or_rebate,
                         order_id,
-                        open_orders: open_order_pk,
+                        open_orders: open_orders_pk,
+                        open_orders_owner: open_orders_owner_pk,
                         owner_slot,
                         fee_tier: fee_tier as u8,
                         client_order_id: client_order_id.map(|i| i.get()),
@@ -3070,7 +3075,8 @@ impl State {
                     });
 
                     emit!(OpenOrdersBalanceLog {
-                        open_orders: open_order_pk,
+                        open_orders: open_orders_pk,
+                        open_orders_owner: open_orders_owner_pk,
                         market: market.pubkey(),
                         native_pc_total: open_orders.native_pc_total,
                         native_coin_total: open_orders.native_coin_total,
