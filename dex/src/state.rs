@@ -1352,17 +1352,29 @@ impl EventView {
 pub struct FillEventLog {
     market: Pubkey,
     open_orders: Pubkey,
+    open_orders_owner: Pubkey,
     bid: bool,
     maker: bool,
     native_qty_paid: u64,
     native_qty_received: u64,
     native_fee_or_rebate: u64,
     order_id: u128,
-    owner: Pubkey,
     owner_slot: u8,
     fee_tier: u8,
     client_order_id: Option<u64>,
     referrer_rebate: Option<u64>,
+}
+
+#[event]
+pub struct OpenOrdersBalanceLog {
+    open_orders: Pubkey,
+    open_orders_owner: Pubkey,
+    market: Pubkey,
+    native_pc_total: u64,
+    native_coin_total: u64,
+    native_coin_free: u64,
+    native_pc_free: u64,
+    referrer_rebates_accrued: u64,
 }
 
 #[derive(Copy, Clone)]
@@ -2979,20 +2991,15 @@ impl State {
             let owner: [u64; 4] = event.owner;
             let owner_index: Result<usize, usize> = open_orders_accounts
                 .binary_search_by_key(&owner, |account_info| account_info.key.to_aligned_bytes());
-            let mut open_orders: RefMut<OpenOrders>;
-            let open_orders_pubkey: &Pubkey;
-            match owner_index {
+            let mut open_orders: RefMut<OpenOrders> = match owner_index {
                 Err(_) => break,
-                Ok(i) => {
-                    open_orders = market.load_orders_mut(
-                        &open_orders_accounts[i],
-                        None,
-                        program_id,
-                        None,
-                        None,
-                    )?;
-                    open_orders_pubkey = &open_orders_accounts[i].key;
-                }
+                Ok(i) => market.load_orders_mut(
+                    &open_orders_accounts[i],
+                    None,
+                    program_id,
+                    None,
+                    None,
+                )?,
             };
 
             check_assert!(event.owner_slot < 128)?;
@@ -3045,9 +3052,11 @@ impl State {
                         );
                     }
 
+                    let open_orders_pk = Pubkey::new(cast_slice(&identity(owner) as &[_]));
+                    let open_orders_owner_pk =
+                        Pubkey::new(cast_slice(&identity(open_orders.owner) as &[_]));
                     emit!(FillEventLog {
                         market: market.pubkey(),
-                        open_orders: *open_orders_pubkey,
                         bid: match side {
                             Side::Bid => true,
                             Side::Ask => false,
@@ -3057,12 +3066,24 @@ impl State {
                         native_qty_received,
                         native_fee_or_rebate,
                         order_id,
-                        owner: Pubkey::new(cast_slice(&identity(owner) as &[_])),
+                        open_orders: open_orders_pk,
+                        open_orders_owner: open_orders_owner_pk,
                         owner_slot,
                         fee_tier: fee_tier as u8,
                         client_order_id: client_order_id.map(|i| i.get()),
                         referrer_rebate
                     });
+
+                    emit!(OpenOrdersBalanceLog {
+                        open_orders: open_orders_pk,
+                        open_orders_owner: open_orders_owner_pk,
+                        market: market.pubkey(),
+                        native_pc_total: open_orders.native_pc_total,
+                        native_coin_total: open_orders.native_coin_total,
+                        native_coin_free: open_orders.native_coin_free,
+                        native_pc_free: open_orders.native_pc_free,
+                        referrer_rebates_accrued: open_orders.referrer_rebates_accrued,
+                    })
                 }
                 EventView::Out {
                     side,
