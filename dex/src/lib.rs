@@ -33,3 +33,19 @@ fn process_instruction(
         instruction_data,
     )?)
 }
+
+#[cfg(not(feature = "no-entrypoint"))]
+use solana_security_txt::security_txt;
+#[cfg(not(feature = "no-entrypoint"))]
+security_txt! {
+    // Required fields
+    name: "OpenBook DEX",
+    project_url: "https://github.com/openbook-dex",
+    contacts: "link:https://github.com/openbook-dex/program/security/advisories/new",
+
+    // Optional Fields
+    preferred_languages: "en",
+    source_code: "https://github.com/openbook-dex/program",
+    source_revision: option_env!("GITHUB_SHA").unwrap().into(),
+    source_release: option_env!("GITHUB_REF_NAME").unwrap().into(),
+}
