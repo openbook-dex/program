@@ -42,10 +42,11 @@ security_txt! {
     name: "OpenBook DEX",
     project_url: "https://github.com/openbook-dex",
     contacts: "link:https://github.com/openbook-dex/program/security/advisories/new",
+    policy: "https://raw.githubusercontent.com/openbook-dex/program/master/SECURITY.md",
 
     // Optional Fields
     preferred_languages: "en",
     source_code: "https://github.com/openbook-dex/program",
-    source_revision: option_env!("GITHUB_SHA").unwrap().into(),
-    source_release: option_env!("GITHUB_REF_NAME").unwrap().into(),
+    source_revision: env!("GITHUB_SHA"),
+    source_release: env!("GITHUB_REF_NAME")
 }
