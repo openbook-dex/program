@@ -5,12 +5,6 @@ use std::convert::TryInto;
 #[cfg(test)]
 use proptest_derive::Arbitrary;
 
-mod flagship_markets {
-    pub mod sol_usdc {
-        solana_program::declare_id!("8BnEgHoWFysVcuFFX7QztDmzuH8r5ZFvyP3sYwn1XTh6");
-    }
-}
-
 mod stable_markets {
     pub mod usdt_usdc {
         solana_program::declare_id!("B2na8Awyd7cpC59iEU43FagJAPLigr3AP3s38KM982bu");
@@ -29,7 +23,6 @@ pub enum FeeTier {
     _SRM6,
     _MSRM,
     Stable,
-    Flagship,
 }
 
 #[repr(transparent)]
@@ -78,10 +71,6 @@ const fn fee_tenth_of_bps(tenth_of_bps: u64) -> U64F64 {
 impl FeeTier {
     #[inline]
     pub fn from_srm_and_msrm_balances(market: &Pubkey, _srm_held: u64, _msrm_held: u64) -> FeeTier {
-        if market == &flagship_markets::sol_usdc::ID {
-            return FeeTier::Flagship;
-        }
-
         if market == &stable_markets::usdt_usdc::ID {
             return FeeTier::Stable;
         }
@@ -93,8 +82,7 @@ impl FeeTier {
         use FeeTier::*;
         match self {
             Stable => fee_tenth_of_bps(5),
-            Flagship => fee_tenth_of_bps(20),
-            Base | _ => fee_tenth_of_bps(100),
+            Base | _ => fee_tenth_of_bps(20),
         }
     }
 
