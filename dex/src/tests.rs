@@ -343,7 +343,7 @@ fn test_new_order() {
 
     {
         let market = Market::load(&accounts.market, &dex_program_id, false).unwrap();
-        assert_eq!(identity(market.referrer_rebates_accrued), 400);
+        assert_eq!(identity(market.referrer_rebates_accrued), 80);
         assert_eq!(identity(market.pc_fees_accrued), 1);
         assert_eq!(
             market.pc_fees_accrued + market.pc_deposits_total + market.referrer_rebates_accrued,
