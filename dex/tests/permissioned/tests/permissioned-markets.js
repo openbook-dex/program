@@ -70,17 +70,15 @@ describe("permissioned-markets", () => {
       ],
       program.programId
     );
-    const [
-      _openOrdersInitAuthority,
-      bumpInit,
-    ] = await PublicKey.findProgramAddress(
-      [
-        anchor.utils.bytes.utf8.encode("open-orders-init"),
-        DEX_PID.toBuffer(),
-        marketProxy.market.address.toBuffer(),
-      ],
-      program.programId
-    );
+    const [_openOrdersInitAuthority, bumpInit] =
+      await PublicKey.findProgramAddress(
+        [
+          anchor.utils.bytes.utf8.encode("open-orders-init"),
+          DEX_PID.toBuffer(),
+          marketProxy.market.address.toBuffer(),
+        ],
+        program.programId
+      );
 
     // Save global variables re-used across tests.
     openOrders = _openOrders;

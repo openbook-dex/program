@@ -1,11 +1,7 @@
 const anchor = require("@project-serum/anchor");
 const { BN } = anchor;
-const {
-  Account,
-  PublicKey,
-  Transaction,
-  SystemProgram,
-} = require("@project-serum/anchor").web3;
+const { Account, PublicKey, Transaction, SystemProgram } =
+  require("@project-serum/anchor").web3;
 const { TOKEN_PROGRAM_ID } = require("@solana/spl-token");
 const serum = require("@project-serum/serum");
 const {
@@ -178,70 +174,10 @@ async function getVaultOwnerAndNonce(marketPublicKey, dexProgramId = DEX_PID) {
 // Dummy keypair for a consistent market address. Helpful when doing UI work.
 // Don't use in production.
 const MARKET_KP = new Account([
-  13,
-  174,
-  53,
-  150,
-  78,
-  228,
-  12,
-  98,
-  170,
-  254,
-  212,
-  211,
-  125,
-  193,
-  2,
-  241,
-  97,
-  137,
-  49,
-  209,
-  189,
-  199,
-  27,
-  215,
-  220,
-  65,
-  57,
-  203,
-  215,
-  93,
-  105,
-  203,
-  217,
-  32,
-  5,
-  194,
-  157,
-  118,
-  162,
-  47,
-  102,
-  126,
-  235,
-  65,
-  99,
-  80,
-  56,
-  231,
-  217,
-  114,
-  25,
-  225,
-  239,
-  140,
-  169,
-  92,
-  150,
-  146,
-  211,
-  218,
-  183,
-  139,
-  9,
-  104,
+  13, 174, 53, 150, 78, 228, 12, 98, 170, 254, 212, 211, 125, 193, 2, 241, 97,
+  137, 49, 209, 189, 199, 27, 215, 220, 65, 57, 203, 215, 93, 105, 203, 217, 32,
+  5, 194, 157, 118, 162, 47, 102, 126, 235, 65, 99, 80, 56, 231, 217, 114, 25,
+  225, 239, 140, 169, 92, 150, 146, 211, 218, 183, 139, 9, 104,
 ]);
 
 module.exports = {

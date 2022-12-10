@@ -78,7 +78,7 @@ class Identity {
       ...ix.keys,
     ];
     // PDA: so ensure the signer is false.
-    ix.keys[ix.keys.length-1].isSigner = false;
+    ix.keys[ix.keys.length - 1].isSigner = false;
   }
   static async pruneAuthority(market, dexProgramId, proxyProgramId) {
     const [addr] = await PublicKey.findProgramAddress(
