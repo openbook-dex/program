@@ -35,7 +35,7 @@ fn process_instruction(
 }
 
 #[cfg(not(feature = "no-entrypoint"))]
-use solana_security_txt::security_txt;
+use {default_env::default_env, solana_security_txt::security_txt};
 #[cfg(not(feature = "no-entrypoint"))]
 security_txt! {
     // Required fields
@@ -47,6 +47,6 @@ security_txt! {
     // Optional Fields
     preferred_languages: "en",
     source_code: "https://github.com/openbook-dex/program",
-    source_revision: env!("GITHUB_SHA"),
-    source_release: env!("GITHUB_REF_NAME")
+    source_revision: default_env!("GITHUB_SHA", "unknown source revision"),
+    source_release: default_env!("GITHUB_REF_NAME", "unknown source release")
 }
