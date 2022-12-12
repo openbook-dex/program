@@ -1,6 +1,6 @@
-const { PublicKey, Account } = require("@project-serum/anchor").web3;
+const { PublicKey, Account } = require('@project-serum/anchor').web3;
 
-const DEX_PID = new PublicKey("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin");
+const DEX_PID = new PublicKey('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin');
 
 // This msut be kept in sync with `scripts/localnet.sh`.
 const PROGRAM_KP = new Account([

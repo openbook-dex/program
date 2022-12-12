@@ -1,8 +1,8 @@
-const anchor = require("@project-serum/anchor");
+const anchor = require('@project-serum/anchor');
 const BN = anchor.BN;
 const { Account, Transaction, SystemProgram } = anchor.web3;
-const serumCmn = require("@project-serum/common");
-const { TOKEN_PROGRAM_ID, Token } = require("@solana/spl-token");
+const serumCmn = require('@project-serum/common');
+const { TOKEN_PROGRAM_ID, Token } = require('@solana/spl-token');
 
 const DECIMALS = 6;
 
@@ -14,9 +14,9 @@ async function createMintGods(provider, mintCount) {
   for (let k = 0; k < mintCount; k += 1) {
     const [mint, god] = await serumCmn.createMintAndVault(
       provider,
-      new BN("1000000000000000000"),
+      new BN('1000000000000000000'),
       undefined,
-      DECIMALS
+      DECIMALS,
     );
     mintGods.push({ mint, god });
   }
@@ -43,10 +43,10 @@ async function createFundedAccount(provider, mints, newAccount) {
           fromPubkey: provider.wallet.publicKey,
           toPubkey: newAccount.publicKey,
           lamports: 100000000000,
-        })
+        }),
       );
       return tx;
-    })()
+    })(),
   );
 
   // Transfer SPL tokens to the market maker.
@@ -59,10 +59,10 @@ async function createFundedAccount(provider, mints, newAccount) {
       provider.connection,
       MINT_A,
       TOKEN_PROGRAM_ID,
-      provider.wallet.payer // node only
+      provider.wallet.payer, // node only
     );
     const marketMakerTokenA = await mintAClient.createAccount(
-      newAccount.publicKey
+      newAccount.publicKey,
     );
 
     await provider.send(
@@ -77,11 +77,11 @@ async function createFundedAccount(provider, mints, newAccount) {
             provider.wallet.publicKey,
             [],
             amount,
-            DECIMALS
-          )
+            DECIMALS,
+          ),
         );
         return tx;
-      })()
+      })(),
     );
 
     marketMaker.tokens[mint.toString()] = marketMakerTokenA;

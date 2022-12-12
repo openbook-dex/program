@@ -1,17 +1,17 @@
-const anchor = require("@project-serum/anchor");
+const anchor = require('@project-serum/anchor');
 const { BN } = anchor;
 const { Account, PublicKey, Transaction, SystemProgram } =
-  require("@project-serum/anchor").web3;
-const { TOKEN_PROGRAM_ID } = require("@solana/spl-token");
-const serum = require("@project-serum/serum");
+  require('@project-serum/anchor').web3;
+const { TOKEN_PROGRAM_ID } = require('@solana/spl-token');
+const serum = require('@project-serum/serum');
 const {
   DexInstructions,
   TokenInstructions,
   OpenOrdersPda,
   MARKET_STATE_LAYOUT_V3,
 } = serum;
-const { Identity } = require("./market-proxy");
-const { DEX_PID } = require("./common");
+const { Identity } = require('./market-proxy');
+const { DEX_PID } = require('./common');
 
 // Creates a market on the dex.
 async function list({
@@ -36,7 +36,7 @@ async function list({
 
   const [vaultOwner, vaultSignerNonce] = await getVaultOwnerAndNonce(
     market.publicKey,
-    dexProgramId
+    dexProgramId,
   );
 
   const tx1 = new Transaction();
@@ -64,7 +64,7 @@ async function list({
       account: quoteVault.publicKey,
       mint: quoteMint,
       owner: vaultOwner,
-    })
+    }),
   );
 
   const tx2 = new Transaction();
@@ -73,7 +73,7 @@ async function list({
       fromPubkey: wallet.publicKey,
       newAccountPubkey: market.publicKey,
       lamports: await connection.getMinimumBalanceForRentExemption(
-        MARKET_STATE_LAYOUT_V3.span
+        MARKET_STATE_LAYOUT_V3.span,
       ),
       space: MARKET_STATE_LAYOUT_V3.span,
       programId: dexProgramId,
@@ -125,19 +125,19 @@ async function list({
       authority: await OpenOrdersPda.marketAuthority(
         market.publicKey,
         DEX_PID,
-        proxyProgramId
+        proxyProgramId,
       ),
       pruneAuthority: await Identity.pruneAuthority(
         market.publicKey,
         DEX_PID,
-        proxyProgramId
+        proxyProgramId,
       ),
       crankAuthority: await Identity.consumeEventsAuthority(
         market.publicKey,
         DEX_PID,
-        proxyProgramId
+        proxyProgramId,
       ),
-    })
+    }),
   );
 
   const transactions = [
@@ -160,15 +160,15 @@ async function getVaultOwnerAndNonce(marketPublicKey, dexProgramId = DEX_PID) {
   while (nonce.toNumber() < 255) {
     try {
       const vaultOwner = await PublicKey.createProgramAddress(
-        [marketPublicKey.toBuffer(), nonce.toArrayLike(Buffer, "le", 8)],
-        dexProgramId
+        [marketPublicKey.toBuffer(), nonce.toArrayLike(Buffer, 'le', 8)],
+        dexProgramId,
       );
       return [vaultOwner, nonce];
     } catch (e) {
       nonce.iaddn(1);
     }
   }
-  throw new Error("Unable to find nonce");
+  throw new Error('Unable to find nonce');
 }
 
 // Dummy keypair for a consistent market address. Helpful when doing UI work.

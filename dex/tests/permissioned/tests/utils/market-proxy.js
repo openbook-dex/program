@@ -1,9 +1,9 @@
-const anchor = require("@project-serum/anchor");
+const anchor = require('@project-serum/anchor');
 const {
   PublicKey,
   SYSVAR_RENT_PUBKEY,
   SYSVAR_CLOCK_PUBKEY,
-} = require("@solana/web3.js");
+} = require('@solana/web3.js');
 const {
   OpenOrders,
   OpenOrdersPda,
@@ -11,7 +11,7 @@ const {
   ReferralFees,
   PermissionedCrank,
   MarketProxyBuilder,
-} = require("@project-serum/serum");
+} = require('@project-serum/serum');
 
 // Returns a client for the market proxy.
 //
@@ -23,7 +23,7 @@ async function load(connection, proxyProgramId, dexProgramId, market) {
       new OpenOrdersPda({
         proxyProgramId,
         dexProgramId,
-      })
+      }),
     )
     .middleware(new ReferralFees())
     .middleware(new Identity())
@@ -33,7 +33,7 @@ async function load(connection, proxyProgramId, dexProgramId, market) {
       market,
       dexProgramId,
       proxyProgramId,
-      options: { commitment: "recent" },
+      options: { commitment: 'recent' },
     });
 }
 
@@ -83,11 +83,11 @@ class Identity {
   static async pruneAuthority(market, dexProgramId, proxyProgramId) {
     const [addr] = await PublicKey.findProgramAddress(
       [
-        anchor.utils.bytes.utf8.encode("prune"),
+        anchor.utils.bytes.utf8.encode('prune'),
         dexProgramId.toBuffer(),
         market.toBuffer(),
       ],
-      proxyProgramId
+      proxyProgramId,
     );
     return addr;
   }

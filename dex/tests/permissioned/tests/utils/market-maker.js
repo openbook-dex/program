@@ -1,5 +1,5 @@
-const { Account, Transaction } = require("@project-serum/anchor").web3;
-const { OpenOrdersPda } = require("@project-serum/serum");
+const { Account, Transaction } = require('@project-serum/anchor').web3;
+const { OpenOrdersPda } = require('@project-serum/serum');
 
 // Dummy keypair.
 const KEYPAIR = new Account([
@@ -16,8 +16,8 @@ async function initOpenOrders(provider, marketProxy, marketMakerAccounts) {
       marketMakerAccounts.account.publicKey,
       marketProxy.market.address,
       marketProxy.market.address, // Dummy. Replaced by middleware.
-      marketProxy.market.address // Dummy. Replaced by middleware.
-    )
+      marketProxy.market.address, // Dummy. Replaced by middleware.
+    ),
   );
   let signers = [marketMakerAccounts.account];
   await provider.send(tx, signers);
@@ -47,7 +47,7 @@ async function postOrders(provider, marketProxy, marketMakerAccounts) {
     marketProxy.market.address,
     marketMakerAccounts.account.publicKey,
     marketProxy.dexProgramId,
-    marketProxy.proxyProgramId
+    marketProxy.proxyProgramId,
   );
   // Use an explicit signer because the provider wallet, which pays for
   // the tx, is different from the market maker wallet.
@@ -59,15 +59,15 @@ async function postOrders(provider, marketProxy, marketMakerAccounts) {
       await marketProxy.instruction.newOrderV3({
         owner: marketMakerAccounts.account.publicKey,
         payer: marketMakerAccounts.baseToken,
-        side: "sell",
+        side: 'sell',
         price: ask[0],
         size: ask[1],
-        orderType: "postOnly",
+        orderType: 'postOnly',
         clientId: undefined,
         openOrdersAddressKey,
         feeDiscountPubkey: null,
-        selfTradeBehavior: "abortTransaction",
-      })
+        selfTradeBehavior: 'abortTransaction',
+      }),
     );
     await provider.send(tx, signers);
   }
@@ -79,15 +79,15 @@ async function postOrders(provider, marketProxy, marketMakerAccounts) {
       await marketProxy.instruction.newOrderV3({
         owner: marketMakerAccounts.account.publicKey,
         payer: marketMakerAccounts.quoteToken,
-        side: "buy",
+        side: 'buy',
         price: bid[0],
         size: bid[1],
-        orderType: "postOnly",
+        orderType: 'postOnly',
         clientId: undefined,
         openOrdersAddressKey,
         feeDiscountPubkey: null,
-        selfTradeBehavior: "abortTransaction",
-      })
+        selfTradeBehavior: 'abortTransaction',
+      }),
     );
     await provider.send(tx, signers);
   }
