@@ -343,7 +343,7 @@ fn test_new_order() {
 
     {
         let market = Market::load(&accounts.market, &dex_program_id, false).unwrap();
-        assert_eq!(identity(market.referrer_rebates_accrued), 400);
+        assert_eq!(identity(market.referrer_rebates_accrued), 80);
         assert_eq!(identity(market.pc_fees_accrued), 1);
         assert_eq!(
             market.pc_fees_accrued + market.pc_deposits_total + market.referrer_rebates_accrued,
@@ -365,8 +365,8 @@ fn test_new_order() {
             .unwrap();
         assert_eq!(identity(open_orders_seller.native_coin_free), 0);
         assert_eq!(identity(open_orders_seller.native_coin_total), 0);
-        assert_eq!(identity(open_orders_seller.native_pc_free), 399200);
-        assert_eq!(identity(open_orders_seller.native_pc_total), 399200);
+        assert_eq!(identity(open_orders_seller.native_pc_free), 399_840);
+        assert_eq!(identity(open_orders_seller.native_pc_total), 399_840);
     }
 
     {
@@ -386,7 +386,7 @@ fn test_new_order() {
 
     {
         let market = Market::load(&accounts.market, &dex_program_id, false).unwrap();
-        assert_eq!(identity(market.referrer_rebates_accrued), 400);
+        assert_eq!(identity(market.referrer_rebates_accrued), 80);
         assert_eq!(identity(market.pc_fees_accrued), 1);
         assert_eq!(
             market.pc_deposits_total + market.pc_fees_accrued + market.referrer_rebates_accrued,
@@ -400,16 +400,16 @@ fn test_new_order() {
             .unwrap();
         assert_eq!(identity(open_orders_buyer.native_coin_free), 4_000);
         assert_eq!(identity(open_orders_buyer.native_coin_total), 4_000);
-        assert_eq!(identity(open_orders_buyer.native_pc_free), 20_399);
-        assert_eq!(identity(open_orders_buyer.native_pc_total), 120_399);
+        assert_eq!(identity(open_orders_buyer.native_pc_free), 20_079);
+        assert_eq!(identity(open_orders_buyer.native_pc_total), 120_079);
         let open_orders_seller = Market::load(&accounts.market, &dex_program_id, false)
             .unwrap()
             .load_orders_mut(&orders_account_seller, None, &dex_program_id, None, None)
             .unwrap();
         assert_eq!(identity(open_orders_seller.native_coin_free), 0);
         assert_eq!(identity(open_orders_seller.native_coin_total), 0);
-        assert_eq!(identity(open_orders_seller.native_pc_free), 399_200);
-        assert_eq!(identity(open_orders_seller.native_pc_total), 399_200);
+        assert_eq!(identity(open_orders_seller.native_pc_free), 399_840);
+        assert_eq!(identity(open_orders_seller.native_pc_total), 399_840);
     }
 }
 
