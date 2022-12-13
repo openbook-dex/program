@@ -1,5 +1,5 @@
 use solana_program::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, info,
+    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg,
     program_error::ProgramError, pubkey::Pubkey,
 };
 
@@ -11,7 +11,7 @@ fn entry(_program_id: &Pubkey, accounts: &[AccountInfo], instruction_data: &[u8]
     }
     let expected_owner = Pubkey::new(instruction_data);
     if expected_owner != *account.owner {
-        info!("Account owner mismatch");
+        msg!("Account owner mismatch");
         return Err(ProgramError::Custom(0x100));
     }
     Ok(())

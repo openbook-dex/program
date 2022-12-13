@@ -44,7 +44,7 @@ impl<'a> MarketProxy<'a> {
         // First account is the Serum DEX executable--used for CPI.
         let dex = &accounts[0];
         require!(dex.key == &dex::ID, ErrorCode::InvalidTargetProgram);
-        let acc_infos = (&accounts[1..]).to_vec();
+        let acc_infos = (accounts[1..]).to_vec();
 
         // Process the instruction data.
         for mw in &mut self.middlewares {

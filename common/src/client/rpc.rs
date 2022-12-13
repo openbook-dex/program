@@ -96,8 +96,8 @@ pub fn create_token_account_instructions(
     let init_account_instr = token_instruction::initialize_account(
         &spl_token::ID,
         &spl_account,
-        &mint_pubkey,
-        &owner_pubkey,
+        mint_pubkey,
+        owner_pubkey,
     )?;
 
     let instructions = vec![create_account_instr, init_account_instr];
