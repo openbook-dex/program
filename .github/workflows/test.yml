@@ -9,8 +9,23 @@ on:
       - master
 
 jobs:
-  lints:
-    name: Run cargo fmt, cargo clippy and prettier check
+  js-lint:
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./dex/tests/permissioned
+    name: Prettier check
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - run: corepack enable
+      shell: bash
+    - run: yarn
+    - name: Run prettier
+      run: yarn prettier '*/**/*{.js,.ts}' --check
+  rust-lint:
+    name: Cargo fmt, cargo clippy
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout sources
@@ -30,15 +45,6 @@ jobs:
         run: cargo fmt --all -- --check
       - name: Run cargo clippy
         run: cargo clippy -- -D warnings
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: corepack enable
-        shell: bash
-      - run: yarn
-      - name: Run prettier
-        run: cd dex/tests/permissioned/ && yarn prettier '*/**/*{.js,.ts}' --check
   test:
     runs-on: ubuntu-20.04
     steps:
