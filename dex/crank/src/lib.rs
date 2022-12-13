@@ -1,5 +1,6 @@
 #![deny(unaligned_references)]
 #![allow(dead_code)]
+#![allow(clippy::too_many_arguments)]
 
 use std::borrow::Cow;
 use std::cmp::{max, min};
@@ -514,7 +515,7 @@ fn init_logger(log_directory: &str) {
 fn consume_events_loop(
     opts: &Opts,
     program_id: &Pubkey,
-    payer_path: &String,
+    payer_path: &str,
     market: &Pubkey,
     coin_wallet: &Pubkey,
     pc_wallet: &Pubkey,
@@ -884,7 +885,7 @@ fn whole_shebang(client: &RpcClient, program_id: &Pubkey, payer: &Keypair) -> Re
             max_coin_qty: NonZeroU64::new(1_000).unwrap(),
             max_native_pc_qty_including_fees: NonZeroU64::new(500_000).unwrap(),
             order_type: OrderType::Limit,
-            client_order_id: 019269,
+            client_order_id: 19269,
             self_trade_behavior: SelfTradeBehavior::DecrementTake,
             limit: std::u16::MAX,
             max_ts: now + 20,
@@ -908,7 +909,7 @@ fn whole_shebang(client: &RpcClient, program_id: &Pubkey, payer: &Keypair) -> Re
             max_coin_qty: NonZeroU64::new(1_000).unwrap(),
             max_native_pc_qty_including_fees: NonZeroU64::new(500_000).unwrap(),
             order_type: OrderType::Limit,
-            client_order_id: 019269,
+            client_order_id: 19269,
             self_trade_behavior: SelfTradeBehavior::DecrementTake,
             limit: std::u16::MAX,
             max_ts: now - 5,
