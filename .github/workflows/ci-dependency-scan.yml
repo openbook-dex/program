@@ -1,0 +1,37 @@
+name: Dependency Security Scan
+
+on:
+  pull_request: 
+    branches: 
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  trivy:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Report all vulnerabilities in security tab
+      - name: Report on all vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          hide-progress: true
+          format: 'sarif'
+          
+      # Fail the job on critical vulnerabiliies with fix available
+      - name: Fail on critical vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          hide-progress: true
+          format: 'table'
+          severity: 'CRITICAL'
+          exit-code: '1'
