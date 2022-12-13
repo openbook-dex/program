@@ -35,3 +35,9 @@ jobs:
           format: 'table'
           severity: 'CRITICAL'
           exit-code: '1'
+      
+      - name: Upload scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
