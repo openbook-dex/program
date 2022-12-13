@@ -24,6 +24,7 @@ jobs:
           ignore-unfixed: true
           hide-progress: true
           format: 'sarif'
+          output: 'trivy-results.sarif'
           
       # Fail the job on critical vulnerabiliies with fix available
       - name: Fail on critical vulnerabilities
