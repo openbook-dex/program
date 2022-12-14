@@ -1,4 +1,4 @@
-name: Test
+name: Lint & Test
 
 on:
   push:
@@ -8,14 +8,18 @@ on:
     branches:
       - master
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  rust-lint:
-    name: Cargo fmt, cargo clippy
-    runs-on: ubuntu-20.04
+  lint:
+    name: fmt & clippy
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
-      - name: Cache Cargo and target
+
+      - name: Cache binaries
         uses: actions/cache@v3
         with:
           path: |
@@ -26,16 +30,30 @@ jobs:
             target/
             dex/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
+
       - name: Run cargo clippy
         run: cargo clippy -- -D warnings
+  
   test:
-    runs-on: ubuntu-20.04
+    name: Build & test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        path: ['Cargo.toml',
+               'dex/Cargo.toml',
+               'dex/fuzz/Cargo.toml']
+    env:
+      PROGRAM_PATH: ${{ matrix.path }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout sources
+        uses: actions/checkout@v3
 
-      - uses: actions/cache@v3
+      - name: Cache binaries
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/bin/
@@ -46,7 +64,10 @@ jobs:
             dex/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: test
+      - name: Test build
         run: |
-          cargo test --manifest-path Cargo.toml --all
-          cargo test --manifest-path dex/Cargo.toml --all
+          cargo test --manifest-path ${{ matrix.path }} --workspace
+
+      - name: Unit tests
+        run: |
+          cargo test --manifest-path ${{ matrix.path }} --workspace

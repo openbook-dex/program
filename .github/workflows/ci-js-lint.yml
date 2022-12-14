@@ -23,13 +23,20 @@ jobs:
       run:
         working-directory: ./dex/tests/permissioned
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: corepack enable
+
+      - name: Enable corepack
+        run: corepack enable
         shell: bash
-      - run: yarn
+
+      - name: Install yarn
+        run: yarn
+        
       - name: Run prettier
         run: yarn prettier '*/**/*{.js,.ts}' --check
