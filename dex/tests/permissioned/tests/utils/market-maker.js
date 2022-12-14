@@ -1,72 +1,12 @@
-const { Account, Transaction } = require("@project-serum/anchor").web3;
-const { OpenOrdersPda } = require("@project-serum/serum");
+const { Account, Transaction } = require('@project-serum/anchor').web3;
+const { OpenOrdersPda } = require('@project-serum/serum');
 
 // Dummy keypair.
 const KEYPAIR = new Account([
-  54,
-  213,
-  91,
-  255,
-  163,
-  120,
-  88,
-  183,
-  223,
-  23,
-  220,
-  204,
-  82,
-  117,
-  212,
-  214,
-  118,
-  184,
-  2,
-  29,
-  89,
-  149,
-  22,
-  233,
-  108,
-  177,
-  60,
-  249,
-  218,
-  166,
-  30,
-  221,
-  59,
-  168,
-  233,
-  123,
-  204,
-  37,
-  123,
-  124,
-  86,
-  176,
-  214,
-  12,
-  63,
-  195,
-  231,
-  15,
-  1,
-  143,
-  7,
-  7,
-  232,
-  38,
-  69,
-  214,
-  45,
-  58,
-  115,
-  55,
-  129,
-  25,
-  228,
-  30,
+  54, 213, 91, 255, 163, 120, 88, 183, 223, 23, 220, 204, 82, 117, 212, 214,
+  118, 184, 2, 29, 89, 149, 22, 233, 108, 177, 60, 249, 218, 166, 30, 221, 59,
+  168, 233, 123, 204, 37, 123, 124, 86, 176, 214, 12, 63, 195, 231, 15, 1, 143,
+  7, 7, 232, 38, 69, 214, 45, 58, 115, 55, 129, 25, 228, 30,
 ]);
 
 async function initOpenOrders(provider, marketProxy, marketMakerAccounts) {
@@ -76,8 +16,8 @@ async function initOpenOrders(provider, marketProxy, marketMakerAccounts) {
       marketMakerAccounts.account.publicKey,
       marketProxy.market.address,
       marketProxy.market.address, // Dummy. Replaced by middleware.
-      marketProxy.market.address // Dummy. Replaced by middleware.
-    )
+      marketProxy.market.address, // Dummy. Replaced by middleware.
+    ),
   );
   let signers = [marketMakerAccounts.account];
   await provider.send(tx, signers);
@@ -107,7 +47,7 @@ async function postOrders(provider, marketProxy, marketMakerAccounts) {
     marketProxy.market.address,
     marketMakerAccounts.account.publicKey,
     marketProxy.dexProgramId,
-    marketProxy.proxyProgramId
+    marketProxy.proxyProgramId,
   );
   // Use an explicit signer because the provider wallet, which pays for
   // the tx, is different from the market maker wallet.
@@ -119,15 +59,15 @@ async function postOrders(provider, marketProxy, marketMakerAccounts) {
       await marketProxy.instruction.newOrderV3({
         owner: marketMakerAccounts.account.publicKey,
         payer: marketMakerAccounts.baseToken,
-        side: "sell",
+        side: 'sell',
         price: ask[0],
         size: ask[1],
-        orderType: "postOnly",
+        orderType: 'postOnly',
         clientId: undefined,
         openOrdersAddressKey,
         feeDiscountPubkey: null,
-        selfTradeBehavior: "abortTransaction",
-      })
+        selfTradeBehavior: 'abortTransaction',
+      }),
     );
     await provider.send(tx, signers);
   }
@@ -139,15 +79,15 @@ async function postOrders(provider, marketProxy, marketMakerAccounts) {
       await marketProxy.instruction.newOrderV3({
         owner: marketMakerAccounts.account.publicKey,
         payer: marketMakerAccounts.quoteToken,
-        side: "buy",
+        side: 'buy',
         price: bid[0],
         size: bid[1],
-        orderType: "postOnly",
+        orderType: 'postOnly',
         clientId: undefined,
         openOrdersAddressKey,
         feeDiscountPubkey: null,
-        selfTradeBehavior: "abortTransaction",
-      })
+        selfTradeBehavior: 'abortTransaction',
+      }),
     );
     await provider.send(tx, signers);
   }

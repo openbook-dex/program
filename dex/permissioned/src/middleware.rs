@@ -187,7 +187,7 @@ impl MarketMiddleware for OpenOrdersPda {
         });
 
         // Chop off the first two accounts needed for initializing the PDA.
-        ctx.accounts = (&ctx.accounts[2..]).to_vec();
+        ctx.accounts = (ctx.accounts[2..]).to_vec();
 
         // Set PDAs.
         ctx.accounts[1] = Self::prepare_pda(&ctx.accounts[0]);

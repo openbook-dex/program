@@ -1,10 +1,10 @@
-const { BN } = require("@project-serum/anchor");
-const { PublicKey } = require("@project-serum/anchor").web3;
-const marketProxy = require("./market-proxy");
-const marketLister = require("./market-lister");
-const faucet = require("./faucet");
-const { DEX_PID } = require("./common");
-const marketMaker = require("./market-maker");
+const { BN } = require('@project-serum/anchor');
+const { PublicKey } = require('@project-serum/anchor').web3;
+const marketProxy = require('./market-proxy');
+const marketLister = require('./market-lister');
+const faucet = require('./faucet');
+const { DEX_PID } = require('./common');
+const marketMaker = require('./market-maker');
 
 // Initializes the genesis state for the tests and localnetwork.
 async function genesis({ provider, proxyProgramId }) {
@@ -22,10 +22,10 @@ async function genesis({ provider, proxyProgramId }) {
     mintGods.map((mintGod) => {
       return {
         ...mintGod,
-        amount: new BN("10000000000000").muln(10 ** faucet.DECIMALS),
+        amount: new BN('10000000000000').muln(10 ** faucet.DECIMALS),
       };
     }),
-    marketMaker.KEYPAIR
+    marketMaker.KEYPAIR,
   );
 
   //
@@ -59,7 +59,7 @@ async function genesis({ provider, proxyProgramId }) {
     provider.connection,
     proxyProgramId,
     DEX_PID,
-    marketAPublicKey
+    marketAPublicKey,
   );
 
   //
@@ -68,7 +68,7 @@ async function genesis({ provider, proxyProgramId }) {
   await marketMaker.initOpenOrders(
     provider,
     marketProxyClient,
-    marketMakerAccounts
+    marketMakerAccounts,
   );
 
   //
@@ -77,7 +77,7 @@ async function genesis({ provider, proxyProgramId }) {
   await marketMaker.postOrders(
     provider,
     marketProxyClient,
-    marketMakerAccounts
+    marketMakerAccounts,
   );
 
   //

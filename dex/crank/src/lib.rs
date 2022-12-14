@@ -1,5 +1,6 @@
 #![deny(unaligned_references)]
 #![allow(dead_code)]
+#![allow(clippy::too_many_arguments)]
 
 use std::borrow::Cow;
 use std::cmp::{max, min};
@@ -14,7 +15,6 @@ use std::{thread, time};
 use anyhow::{format_err, Result};
 use clap::Parser;
 use debug_print::debug_println;
-use enumflags2::BitFlags;
 use log::{error, info};
 use rand::rngs::OsRng;
 use safe_transmute::{
@@ -248,10 +248,10 @@ pub fn start(opts: Opts) -> Result<()> {
             ref coin_wallet,
             ref pc_wallet,
         } => {
-            let payer = read_keypair_file(&payer)?;
+            let payer = read_keypair_file(payer)?;
 
             debug_println!("Getting market keys ...");
-            let market_keys = get_keys_for_market(&client, dex_program_id, &market)?;
+            let market_keys = get_keys_for_market(&client, dex_program_id, market)?;
             debug_println!("{:#?}", market_keys);
             match_orders(
                 &client,
@@ -278,11 +278,11 @@ pub fn start(opts: Opts) -> Result<()> {
             init_logger(log_directory);
             consume_events_loop(
                 &opts,
-                &dex_program_id,
-                &payer,
-                &market,
-                &coin_wallet,
-                &pc_wallet,
+                dex_program_id,
+                payer,
+                market,
+                coin_wallet,
+                pc_wallet,
                 num_workers,
                 events_per_worker,
                 num_accounts.unwrap_or(32),
@@ -308,7 +308,7 @@ pub fn start(opts: Opts) -> Result<()> {
             ref dex_program_id,
             ref market,
         } => {
-            let market_keys = get_keys_for_market(&client, dex_program_id, &market)?;
+            let market_keys = get_keys_for_market(&client, dex_program_id, market)?;
             let event_q_data = client.get_account_data(&market_keys.event_q)?;
             let inner: Cow<[u64]> = remove_dex_account_padding(&event_q_data)?;
             let (header, events_seg0, events_seg1) = parse_event_queue(&inner)?;
@@ -333,8 +333,8 @@ pub fn start(opts: Opts) -> Result<()> {
             ref signer,
         } => {
             let payer = read_keypair_file(payer)?;
-            let signer = signer.as_ref().map(|s| read_keypair_file(&s)).transpose()?;
-            let market_keys = get_keys_for_market(&client, dex_program_id, &market)?;
+            let signer = signer.as_ref().map(|s| read_keypair_file(s)).transpose()?;
+            let market_keys = get_keys_for_market(&client, dex_program_id, market)?;
             settle_funds(
                 &client,
                 dex_program_id,
@@ -425,7 +425,7 @@ fn get_keys_for_market<'a>(
     program_id: &'a Pubkey,
     market: &'a Pubkey,
 ) -> Result<MarketPubkeys> {
-    let account_data: Vec<u8> = client.get_account_data(&market)?;
+    let account_data: Vec<u8> = client.get_account_data(market)?;
     let words: Cow<[u64]> = remove_dex_account_padding(&account_data)?;
     let market_state: MarketState = {
         let account_flags = Market::account_flags(&account_data)?;
@@ -515,7 +515,7 @@ fn init_logger(log_directory: &str) {
 fn consume_events_loop(
     opts: &Opts,
     program_id: &Pubkey,
-    payer_path: &String,
+    payer_path: &str,
     market: &Pubkey,
     coin_wallet: &Pubkey,
     pc_wallet: &Pubkey,
@@ -527,21 +527,21 @@ fn consume_events_loop(
 ) -> Result<()> {
     info!("Getting market keys ...");
     let client = opts.client();
-    let market_keys = get_keys_for_market(&client, &program_id, &market)?;
+    let market_keys = get_keys_for_market(&client, program_id, market)?;
     info!("{:#?}", market_keys);
     let pool = threadpool::ThreadPool::new(num_workers);
     let max_slot_height_mutex = Arc::new(Mutex::new(0_u64));
     let mut last_cranked_at = std::time::Instant::now()
         .checked_sub(std::time::Duration::from_secs(max_wait_for_events_delay))
-        .unwrap_or(std::time::Instant::now());
+        .unwrap_or_else(std::time::Instant::now);
 
     loop {
         thread::sleep(time::Duration::from_millis(1000));
 
         let loop_start = std::time::Instant::now();
         let start_time = std::time::Instant::now();
-        let event_q_value_and_context =
-            client.get_account_with_commitment(&market_keys.event_q, CommitmentConfig::recent())?;
+        let event_q_value_and_context = client
+            .get_account_with_commitment(&market_keys.event_q, CommitmentConfig::processed())?;
         let event_q_slot = event_q_value_and_context.context.slot;
         let max_slot_height = max_slot_height_mutex.lock().unwrap();
         if event_q_slot <= *max_slot_height {
@@ -554,12 +554,12 @@ fn consume_events_loop(
         drop(max_slot_height);
         let event_q_data = event_q_value_and_context
             .value
-            .ok_or(format_err!("Failed to retrieve account"))?
+            .ok_or_else(|| format_err!("Failed to retrieve account"))?
             .data;
         let req_q_data = client
-            .get_account_with_commitment(&market_keys.req_q, CommitmentConfig::recent())?
+            .get_account_with_commitment(&market_keys.req_q, CommitmentConfig::processed())?
             .value
-            .ok_or(format_err!("Failed to retrieve account"))?
+            .ok_or_else(|| format_err!("Failed to retrieve account"))?
             .data;
         let inner: Cow<[u64]> = remove_dex_account_padding(&event_q_data)?;
         let (_header, seg0, seg1) = parse_event_queue(&inner)?;
@@ -639,8 +639,8 @@ fn consume_events_loop(
                 end_time.duration_since(start_time).as_millis()
             );
             for thread_num in 0..min(num_workers, 2 * event_q_len / events_per_worker + 1) {
-                let payer = read_keypair_file(&payer_path)?;
-                let program_id = program_id.clone();
+                let payer = read_keypair_file(payer_path)?;
+                let program_id = *program_id;
                 let client = opts.client();
                 let account_metas = account_metas.clone();
                 let event_q = *market_keys.event_q;
@@ -682,9 +682,9 @@ fn consume_events_wrapper(
 ) {
     let start = std::time::Instant::now();
     let result = consume_events_once(
-        &client,
+        client,
         program_id,
-        &payer,
+        payer,
         account_metas,
         to_consume,
         thread_num,
@@ -714,7 +714,7 @@ pub fn consume_events_once(
     account_metas: Vec<AccountMeta>,
     to_consume: usize,
     _thread_number: usize,
-    event_q: Pubkey,
+    _event_q: Pubkey,
 ) -> Result<Signature> {
     let _start = std::time::Instant::now();
     let instruction_data: Vec<u8> = MarketInstruction::ConsumeEvents(to_consume as u16).pack();
@@ -885,7 +885,7 @@ fn whole_shebang(client: &RpcClient, program_id: &Pubkey, payer: &Keypair) -> Re
             max_coin_qty: NonZeroU64::new(1_000).unwrap(),
             max_native_pc_qty_including_fees: NonZeroU64::new(500_000).unwrap(),
             order_type: OrderType::Limit,
-            client_order_id: 019269,
+            client_order_id: 19269,
             self_trade_behavior: SelfTradeBehavior::DecrementTake,
             limit: std::u16::MAX,
             max_ts: now + 20,
@@ -909,7 +909,7 @@ fn whole_shebang(client: &RpcClient, program_id: &Pubkey, payer: &Keypair) -> Re
             max_coin_qty: NonZeroU64::new(1_000).unwrap(),
             max_native_pc_qty_including_fees: NonZeroU64::new(500_000).unwrap(),
             order_type: OrderType::Limit,
-            client_order_id: 019269,
+            client_order_id: 19269,
             self_trade_behavior: SelfTradeBehavior::DecrementTake,
             limit: std::u16::MAX,
             max_ts: now - 5,
@@ -1241,7 +1241,7 @@ fn settle_funds(
         i += 1;
         assert!(i < 10);
         debug_println!("Simulating SettleFunds instruction ...");
-        let result = simulate_transaction(client, &txn, true, CommitmentConfig::single())?;
+        let result = simulate_transaction(client, &txn, true, CommitmentConfig::confirmed())?;
         if let Some(e) = result.value.err {
             return Err(format_err!("simulate_transaction error: {:?}", e));
         }
@@ -1329,7 +1329,7 @@ pub fn list_market(
     );
 
     debug_println!("txn:\n{:#x?}", txn);
-    let result = simulate_transaction(client, &txn, true, CommitmentConfig::single())?;
+    let result = simulate_transaction(client, &txn, true, CommitmentConfig::confirmed())?;
     if let Some(e) = result.value.err {
         return Err(format_err!("simulate_transaction error: {:?}", e));
     }
@@ -1451,7 +1451,7 @@ pub fn match_orders(
     );
 
     debug_println!("Simulating order matching ...");
-    let result = simulate_transaction(&client, &txn, true, CommitmentConfig::single())?;
+    let result = simulate_transaction(client, &txn, true, CommitmentConfig::confirmed())?;
     if let Some(e) = result.value.err {
         return Err(format_err!("simulate_transaction error: {:?}", e));
     }
@@ -1485,8 +1485,8 @@ fn create_account(
     let init_account_instr = token_instruction::initialize_account(
         &spl_token::ID,
         &spl_account.pubkey(),
-        &mint_pubkey,
-        &owner_pubkey,
+        mint_pubkey,
+        owner_pubkey,
     )?;
 
     let instructions = vec![create_account_instr, init_account_instr];
@@ -1581,7 +1581,7 @@ async fn read_queue_length_loop(
         let client = client.clone();
         let market_keys = get_keys_for_market(&client, &program_id, &market).unwrap();
         let event_q_data = client
-            .get_account_with_commitment(&market_keys.event_q, CommitmentConfig::recent())
+            .get_account_with_commitment(&market_keys.event_q, CommitmentConfig::processed())
             .unwrap()
             .value
             .expect("Failed to retrieve account")
@@ -1592,5 +1592,6 @@ async fn read_queue_length_loop(
         format!("{{ \"length\": {}  }}", len)
     });
 
-    Ok(warp::serve(get_data).run(([127, 0, 0, 1], port)).await)
+    warp::serve(get_data).run(([127, 0, 0, 1], port)).await;
+    Ok(())
 }

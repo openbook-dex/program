@@ -1,0 +1,35 @@
+name: Js Lint
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**.ts'
+      - '**.js'
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**.ts'
+      - '**.js'
+
+jobs:
+  js-lint:
+    name: Prettier check
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./dex/tests/permissioned
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: corepack enable
+        shell: bash
+      - run: yarn
+      - name: Run prettier
+        run: yarn prettier '*/**/*{.js,.ts}' --check
