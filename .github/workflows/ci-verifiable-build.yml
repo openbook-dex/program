@@ -20,15 +20,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      # - name: Install Anchor CLI
+      #   run: |
+      #     npm install -g @project-serum/anchor-cli@${{ env.ANCHOR_CLI_VERSION }}
+      #     anchor --version
+
+      # Install CLI from a fork allowing env passthrough to docker
       - name: Install Anchor CLI
         run: |
-          npm install -g @project-serum/anchor-cli@${{ env.ANCHOR_CLI_VERSION }}
+          cargo install --git https://github.com/riordanp/anchor.git --rev 0bd8aba891639651cefc4aa0fa0f15174958e725 anchor-cli --locked
           anchor --version
 
       - name: Verifiable Build
         run: |
           echo "APP_NAME=$(cargo metadata --no-deps --format-version 1 | jq --raw-output '.packages[0].name')" >> $GITHUB_ENV 
-          anchor build --verifiable
+          anchor build --verifiable GITHUB_SHA=${{ github.sha }} GITHUB_REF_NAME=${{ github.ref_name }}
 
       - name: Generate Checksum
         run: |
