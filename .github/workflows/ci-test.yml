@@ -13,7 +13,7 @@ env:
 
 jobs:
   trivy:
-    name: Crate security scan
+    name: Dependency security scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -48,6 +48,7 @@ jobs:
 
   lint:
     name: fmt & clippy
+    needs: ['trivy']
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -73,6 +74,7 @@ jobs:
   
   test:
     name: Run tests
+    needs: ['trivy']
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -103,7 +105,7 @@ jobs:
 
   pass:
     name: All tests pass
-    needs: ['trivy', 'lint', 'test']
+    needs: ['test', 'lint', 'trivy']
     runs-on: ubuntu-latest
     steps:
       - run: echo ok
