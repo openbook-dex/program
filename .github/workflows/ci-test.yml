@@ -1,4 +1,4 @@
-name: Lint & Test
+name: Scan & Test
 
 on:
   push:
@@ -12,6 +12,40 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  trivy:
+    name: Crate security scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Report all vulnerabilities in security tab
+      - name: Report on all vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          hide-progress: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          
+      # Fail the job on critical vulnerabiliies with fix available
+      - name: Fail on critical vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          hide-progress: true
+          format: 'table'
+          severity: 'CRITICAL'
+          exit-code: '1'
+      
+      - name: Upload scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
   lint:
     name: fmt & clippy
     runs-on: ubuntu-latest
@@ -38,7 +72,7 @@ jobs:
         run: cargo clippy -- -D warnings
   
   test:
-    name: Build & test
+    name: Run tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -68,8 +102,8 @@ jobs:
           cargo test --manifest-path ${{ matrix.path }} --workspace
 
   pass:
-    name: Tests passed
-    needs: ['lint', 'test']
+    name: All tests pass
+    needs: ['trivy', 'lint', 'test']
     runs-on: ubuntu-latest
     steps:
       - run: echo ok
