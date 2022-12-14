@@ -46,9 +46,22 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  lint:
-    name: fmt & clippy
+  format:
+    name: Format
     needs: ['trivy']
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+
+  clippy:
+    name: Clippy
+    needs: ['trivy']
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -66,15 +79,13 @@ jobs:
             dex/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
-
       - name: Run cargo clippy
         run: cargo clippy -- -D warnings
   
   test:
-    name: Run tests
+    name: Cargo test
     needs: ['trivy']
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -105,7 +116,7 @@ jobs:
 
   pass:
     name: All tests pass
-    needs: ['test', 'lint', 'trivy']
+    needs: ['trivy', 'format', 'clippy', 'test']
     runs-on: ubuntu-latest
     steps:
       - run: echo ok
