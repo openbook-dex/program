@@ -10,19 +10,19 @@ path = "src/bin/main.rs"
 [dependencies]
 serum_dex = { path = "../", default-features = false, features = ["client", "program"] }
 serum-common = { path = "../../common", features = ["client"] }
-spl-token = { version = "3.0.0-pre1", features = ["no-entrypoint"], default-features = false }
-clap = { version = "3.1.6", features = ["derive"] }
+spl-token = { version = "3.5.0", features = ["no-entrypoint"], default-features = false }
+clap = { version = "4.0.29", features = ["derive"] }
 enumflags2 = "0.6.4"
-solana-client = "1.6.18"
-solana-sdk = "1.6.18"
-anyhow = "1.0.32"
+solana-client = "1.10.41"
+solana-sdk = "1.10.41"
+anyhow = "1.0.66"
 rand = "0.7.3"
-safe-transmute = "0.11.0"
+safe-transmute = "0.11.2"
 threadpool = "1.8.1"
-sloggers = "1.0"
-slog-scope = "4.3"
-slog-stdlog = "4"
-log = "0.4"
+sloggers = "2.1.1"
+slog-scope = "4.4.0"
+slog-stdlog = "4.1.1"
+log = "0.4.17"
 debug_print = "1.0.0"
-tokio = {version = "0.2", features = ["full"]}
-warp = "0.2"
+tokio = {version = "0.2.25", features = ["full"]}
+warp = "0.3.3"
