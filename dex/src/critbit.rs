@@ -124,6 +124,35 @@ impl LeafNode {
     }
 }
 
+pub struct LeafNodeIterator<'a> {
+    descending: bool,
+    slab: &'a Slab,
+    stack: Vec<NodeHandle>,
+}
+
+impl<'a> Iterator for LeafNodeIterator<'a> {
+    type Item = &'a LeafNode;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(node_handle) = self.stack.pop() {
+            let node_ref = self.slab.get(node_handle).unwrap().case().unwrap();
+            match node_ref {
+                NodeRef::Inner(inner) => {
+                    if self.descending {
+                        self.stack.push(inner.children[0]);
+                        self.stack.push(inner.children[1]);
+                    } else {
+                        self.stack.push(inner.children[1]);
+                        self.stack.push(inner.children[0]);
+                    }
+                }
+                NodeRef::Leaf(leaf) => return Some(leaf),
+            }
+        }
+        None
+    }
+}
+
 #[derive(Copy, Clone)]
 #[repr(packed)]
 #[allow(dead_code)]
@@ -724,29 +753,16 @@ impl Slab {
         self.remove_by_key(self.get(self.find_max()?)?.key()?)
     }
 
-    #[cfg(test)]
-    fn traverse(&self) -> Vec<&LeafNode> {
-        fn walk_rec<'a>(slab: &'a Slab, sub_root: NodeHandle, buf: &mut Vec<&'a LeafNode>) {
-            match slab.get(sub_root).unwrap().case().unwrap() {
-                NodeRef::Leaf(leaf) => {
-                    buf.push(leaf);
-                }
-                NodeRef::Inner(inner) => {
-                    walk_rec(slab, inner.children[0], buf);
-                    walk_rec(slab, inner.children[1], buf);
-                }
-            }
+    pub fn iter(&self, descending: bool) -> LeafNodeIterator<'_> {
+        let mut stack = vec![];
+        if let Some(node_handle) = self.root() {
+            stack.push(node_handle);
         }
-
-        let mut buf = Vec::with_capacity(self.header().leaf_count as usize);
-        if let Some(r) = self.root() {
-            walk_rec(self, r, &mut buf);
+        LeafNodeIterator {
+            descending,
+            slab: self,
+            stack,
         }
-        if buf.len() != buf.capacity() {
-            self.hexdump();
-        }
-        assert_eq!(buf.len(), buf.capacity());
-        buf
     }
 
     #[cfg(test)]
@@ -825,11 +841,10 @@ mod tests {
     use super::*;
     use bytemuck::bytes_of;
     use rand::prelude::*;
+    use std::collections::BTreeMap;
 
     #[test]
     fn simulate_find_min() {
-        use std::collections::BTreeMap;
-
         for trial in 0..10u64 {
             let mut aligned_buf = vec![0u64; 10_000];
             let bytes: &mut [u8] = cast_slice_mut(aligned_buf.as_mut_slice());
@@ -931,7 +946,7 @@ mod tests {
             for i in 0..100_000 {
                 slab.check_invariants();
                 let model_state = model.values().collect::<Vec<_>>();
-                let slab_state = slab.traverse();
+                let slab_state: Vec<&LeafNode> = slab.iter(false).collect();
                 assert_eq!(model_state, slab_state);
 
                 match weights[dist.sample(&mut rng)].0 {
@@ -994,5 +1009,29 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn test_leaf_node_iter() {
+        let mut aligned_buf = vec![0u64; 10_000];
+        let bytes: &mut [u8] = cast_slice_mut(aligned_buf.as_mut_slice());
+
+        let slab: &mut Slab = Slab::new(bytes);
+        let mut model: BTreeMap<u128, LeafNode> = BTreeMap::new();
+
+        let mut rng = StdRng::from_entropy();
+
+        for _i in 0..100 {
+            let offset = rng.gen();
+            let key = rng.gen();
+            let owner = rng.gen();
+            let qty = rng.gen();
+            let leaf = LeafNode::new(offset, key, owner, qty, FeeTier::Base, 0);
+
+            slab.insert_leaf(&leaf).unwrap();
+            model.insert(key, leaf).ok_or(()).unwrap_err();
+        }
+
+        assert!(slab.iter(false).eq(model.values()));
     }
 }
