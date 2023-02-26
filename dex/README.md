@@ -13,7 +13,7 @@ cargo test
 ### Compile the dex binary
 
 ```bash
-cargo build --relase dex
+cargo build --release
 ```
 
 ### Deploy the dex to the configured solana cluster
