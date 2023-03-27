@@ -31,6 +31,7 @@ use crate::{
         SendTakeInstruction,
     },
     matching::{OrderBookState, OrderType, RequestProceeds, Side},
+    utils::close_account_and_transfer_rent,
 };
 
 use anchor_lang::prelude::{borsh, emit, event, AnchorDeserialize, AnchorSerialize};
@@ -2459,6 +2460,55 @@ pub(crate) mod account_parser {
             })
         }
     }
+    pub struct CloseMarketArgs<'a, 'b: 'a> {
+        pub program_id: &'a Pubkey,
+        pub market_acc: &'a AccountInfo<'b>,
+        pub req_q: &'a AccountInfo<'b>,
+        pub event_q: &'a AccountInfo<'b>,
+        pub bids: &'a AccountInfo<'b>,
+        pub asks: &'a AccountInfo<'b>,
+        pub coin_vault: &'a AccountInfo<'b>,
+        pub pc_vault: &'a AccountInfo<'b>,
+        pub dest_acc: &'a AccountInfo<'b>,
+        pub rent_sysvar_acc: &'a AccountInfo<'b>,
+    }
+
+    impl<'a, 'b: 'a> CloseMarketArgs<'a, 'b> {
+        pub fn with_parsed_args<T>(
+            program_id: &'a Pubkey,
+            accounts: &'a [AccountInfo<'b>],
+            f: impl FnOnce(CloseMarketArgs) -> DexResult<T>,
+        ) -> DexResult<T> {
+            // Parse accounts.
+            check_assert_eq!(accounts.len(), 9)?;
+            #[rustfmt::skip]
+            let &[
+                ref market_acc,
+                ref req_q,
+                ref event_q,
+                ref bids,
+                ref asks,
+                ref coin_vault,
+                ref pc_vault,
+                ref dest_acc,
+                ref rent_sysvar_acc,
+            ] = array_ref![accounts, 0, 9];
+
+            // Invoke processor.
+            f(CloseMarketArgs {
+                program_id,
+                market_acc,
+                req_q,
+                event_q,
+                bids,
+                asks,
+                coin_vault,
+                pc_vault,
+                dest_acc,
+                rent_sysvar_acc,
+            })
+        }
+    }
 
     pub struct InitOpenOrdersArgs;
 
@@ -2699,6 +2749,11 @@ impl State {
                     Self::process_close_open_orders,
                 )?
             }
+            MarketInstruction::CloseMarket => account_parser::CloseMarketArgs::with_parsed_args(
+                program_id,
+                accounts,
+                Self::process_close_market,
+            )?,
             MarketInstruction::InitOpenOrders => {
                 account_parser::InitOpenOrdersArgs::with_parsed_args(
                     program_id,
@@ -2787,6 +2842,69 @@ impl State {
         // Mark the account as closed to prevent it from being used before
         // garbage collection.
         open_orders.account_flags = AccountFlag::Closed as u64;
+
+        Ok(())
+    }
+
+    fn process_close_market(args: account_parser::CloseMarketArgs) -> DexResult {
+        // get all the accounts for a market
+        let account_parser::CloseMarketArgs {
+            program_id,
+            market_acc,
+            req_q,
+            event_q,
+            bids,
+            asks,
+            coin_vault,
+            pc_vault,
+            dest_acc,
+            rent_sysvar_acc,
+        } = args;
+
+        let mut market = Market::load(market_acc, program_id, true)?;
+
+        // close req_q
+        match close_account_and_transfer_rent(&program_id, &req_q, &dest_acc, &rent_sysvar_acc) {
+            Ok(()) => {}
+            Err(error) => panic!("Problem closing the request queue account: {:?}", error),
+        };
+        // close event_q
+        match close_account_and_transfer_rent(&program_id, &event_q, &dest_acc, &rent_sysvar_acc) {
+            Ok(()) => {}
+            Err(error) => panic!("Problem closing the event queue account: {:?}", error),
+        };
+        // close bids
+        match close_account_and_transfer_rent(&program_id, &bids, &dest_acc, &rent_sysvar_acc) {
+            Ok(()) => {}
+            Err(error) => panic!("Problem closing the bids account: {:?}", error),
+        };
+        // close asks
+        match close_account_and_transfer_rent(&program_id, &asks, &dest_acc, &rent_sysvar_acc) {
+            Ok(()) => {}
+            Err(error) => panic!("Problem closing the asks account: {:?}", error),
+        };
+        // close coin_vault
+        match close_account_and_transfer_rent(&program_id, &coin_vault, &dest_acc, &rent_sysvar_acc)
+        {
+            Ok(()) => {}
+            Err(error) => panic!("Problem closing the coin vault account: {:?}", error),
+        };
+        // close pc_vault
+        match close_account_and_transfer_rent(&program_id, &pc_vault, &dest_acc, &rent_sysvar_acc) {
+            Ok(()) => {}
+            Err(error) => panic!(
+                "Problem closing the price currency vault account: {:?}",
+                error
+            ),
+        };
+        // close market_acc
+        match close_account_and_transfer_rent(&program_id, &market_acc, &dest_acc, &rent_sysvar_acc)
+        {
+            Ok(()) => {}
+            Err(error) => panic!("Problem closing the market account: {:?}", error),
+        };
+
+        market.account_flags = AccountFlag::Closed as u64;
 
         Ok(())
     }

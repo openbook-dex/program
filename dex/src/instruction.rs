@@ -505,6 +505,17 @@ pub enum MarketInstruction {
     /// 10. `[]` spl token program
     /// 11. `[]` the rent sysvar
     /// 12. `[]` (optional) the (M)SRM account used for fee discounts
+    CloseMarket,
+    /// 0. `[]` spl token program
+    /// 1. `[writable]` the market account
+    /// 2. `[writable]` the request queue
+    /// 3. `[writable]` the event queue
+    /// 4. `[writable]` bids
+    /// 5. `[writable]` asks
+    /// 6. `[writable]` coin_vault
+    /// 7. `[writable]` pc_vault
+    /// 8. `[writable]` destination account for fee collection
+    /// 11. `[]` the rent sysvar
     #[cfg_attr(
         test,
         proptest(
