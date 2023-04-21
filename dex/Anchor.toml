@@ -10,4 +10,4 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.mainnet]
-serum_dex = "srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX"
+openbook_dex = "srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX"

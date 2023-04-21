@@ -911,6 +911,48 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
+name = "openbook_dex"
+version = "0.5.10"
+dependencies = [
+ "anchor-lang",
+ "arbitrary",
+ "arrayref",
+ "bincode",
+ "bytemuck",
+ "byteorder",
+ "default-env",
+ "enumflags2",
+ "field-offset",
+ "itertools",
+ "num-traits",
+ "num_enum",
+ "safe-transmute",
+ "serde",
+ "solana-program",
+ "solana-security-txt",
+ "spl-token",
+ "static_assertions",
+ "thiserror",
+ "without-alloc",
+]
+
+[[package]]
+name = "openbook_dex-fuzz"
+version = "0.0.0"
+dependencies = [
+ "arbitrary",
+ "bumpalo",
+ "itertools",
+ "lazy_static",
+ "libfuzzer-sys",
+ "openbook_dex",
+ "rand",
+ "safe-transmute",
+ "solana-program",
+ "spl-token",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1231,48 +1273,6 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
-]
-
-[[package]]
-name = "serum_dex"
-version = "0.5.10"
-dependencies = [
- "anchor-lang",
- "arbitrary",
- "arrayref",
- "bincode",
- "bytemuck",
- "byteorder",
- "default-env",
- "enumflags2",
- "field-offset",
- "itertools",
- "num-traits",
- "num_enum",
- "safe-transmute",
- "serde",
- "solana-program",
- "solana-security-txt",
- "spl-token",
- "static_assertions",
- "thiserror",
- "without-alloc",
-]
-
-[[package]]
-name = "serum_dex-fuzz"
-version = "0.0.0"
-dependencies = [
- "arbitrary",
- "bumpalo",
- "itertools",
- "lazy_static",
- "libfuzzer-sys",
- "rand",
- "safe-transmute",
- "serum_dex",
- "solana-program",
- "spl-token",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 [package]
-name = "serum_dex-fuzz"
+name = "openbook_dex-fuzz"
 version = "0.0.0"
 authors = ["Automatically generated"]
 publish = false
@@ -19,7 +19,7 @@ rand = "0.7.3"
 itertools = "0.10.5"
 lazy_static = "1.4.0"
 
-[dependencies.serum_dex]
+[dependencies.openbook_dex]
 path = ".."
 features = ["fuzz", "program"]
 

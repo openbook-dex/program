@@ -971,6 +971,37 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
+name = "openbook_dex"
+version = "0.5.10"
+dependencies = [
+ "anchor-lang",
+ "arbitrary",
+ "arrayref",
+ "bincode",
+ "bumpalo",
+ "bytemuck",
+ "byteorder",
+ "default-env",
+ "enumflags2",
+ "field-offset",
+ "hexdump",
+ "itertools 0.10.5",
+ "num-traits",
+ "num_enum",
+ "proptest",
+ "proptest-derive",
+ "rand 0.7.3",
+ "safe-transmute",
+ "serde",
+ "solana-program",
+ "solana-security-txt",
+ "spl-token",
+ "static_assertions",
+ "thiserror",
+ "without-alloc",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1395,37 +1426,6 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
-]
-
-[[package]]
-name = "serum_dex"
-version = "0.5.10"
-dependencies = [
- "anchor-lang",
- "arbitrary",
- "arrayref",
- "bincode",
- "bumpalo",
- "bytemuck",
- "byteorder",
- "default-env",
- "enumflags2",
- "field-offset",
- "hexdump",
- "itertools 0.10.5",
- "num-traits",
- "num_enum",
- "proptest",
- "proptest-derive",
- "rand 0.7.3",
- "safe-transmute",
- "serde",
- "solana-program",
- "solana-security-txt",
- "spl-token",
- "static_assertions",
- "thiserror",
- "without-alloc",
 ]
 
 [[package]]

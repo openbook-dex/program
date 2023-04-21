@@ -3,4 +3,4 @@ mod proxy;
 
 pub use middleware::*;
 pub use proxy::*;
-pub use serum_dex;
+pub use openbook_dex;

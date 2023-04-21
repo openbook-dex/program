@@ -4,9 +4,9 @@ use anchor_lang::solana_program::instruction::Instruction;
 use anchor_lang::solana_program::system_program;
 use anchor_lang::Accounts;
 use anchor_spl::{dex, token};
-use serum_dex::instruction::*;
-use serum_dex::matching::Side;
-use serum_dex::state::OpenOrders;
+use openbook_dex::instruction::*;
+use openbook_dex::matching::Side;
+use openbook_dex::state::OpenOrders;
 use std::mem::size_of;
 
 /// Per request context. Can be used to share data between middleware handlers.
@@ -53,7 +53,7 @@ impl<'a, 'info> Context<'a, 'info> {
     }
 }
 
-/// Implementing this trait allows one to hook into requests to the Serum DEX
+/// Implementing this trait allows one to hook into requests to the Openbook DEX
 /// via a frontend proxy.
 pub trait MarketMiddleware {
     /// Called before any instruction, giving middleware access to the raw
@@ -156,7 +156,7 @@ impl MarketMiddleware for OpenOrdersPda {
     ///
     /// 0. Dex program.
     /// 1. System program.
-    /// .. serum_dex::MarketInstruction::InitOpenOrders.
+    /// .. openbook_dex::MarketInstruction::InitOpenOrders.
     ///
     /// Data:
     ///
@@ -463,7 +463,7 @@ impl ReferralFees {
 impl MarketMiddleware for ReferralFees {
     /// Accounts:
     ///
-    /// .. serum_dex::MarketInstruction::SettleFunds.
+    /// .. openbook_dex::MarketInstruction::SettleFunds.
     fn settle_funds(&self, ctx: &mut Context) -> ProgramResult {
         let referral = token::accessor::authority(&ctx.accounts[9])?;
         require!(referral == self.referral, ErrorCode::InvalidReferral);
@@ -542,7 +542,7 @@ macro_rules! open_orders_init_authority {
 
 #[error(offset = 500)]
 pub enum ErrorCode {
-    #[msg("Program ID does not match the Serum DEX")]
+    #[msg("Program ID does not match the Openbook DEX")]
     InvalidDexPid,
     #[msg("Invalid instruction given")]
     InvalidInstruction,
@@ -571,7 +571,7 @@ pub struct InitAccount<'info> {
         bump = bump,
         payer = authority,
         owner = dex::ID,
-        space = size_of::<OpenOrders>() + SERUM_PADDING,
+        space = size_of::<OpenOrders>() + OPENBOOK_PADDING,
     )]
     pub open_orders: AccountInfo<'info>,
     #[account(signer)]
@@ -587,7 +587,7 @@ pub struct InitAccount<'info> {
 
 // Constants.
 
-// Padding added to every serum account.
+// Padding added to every Openbook account.
 //
 // b"serum".len() + b"padding".len().
-const SERUM_PADDING: usize = 12;
+const OPENBOOK_PADDING: usize = 12;

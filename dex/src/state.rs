@@ -1642,7 +1642,7 @@ pub(crate) mod account_parser {
     pub struct InitializeMarketArgs<'a, 'b: 'a> {
         pub program_id: &'a Pubkey,
         pub instruction: &'a InitializeMarketInstruction,
-        serum_dex_accounts: &'a [AccountInfo<'b>; 5],
+        openbook_dex_accounts: &'a [AccountInfo<'b>; 5],
         pub coin_vault_and_mint: TokenAccountAndMint<'a, 'b>,
         pub pc_vault_and_mint: TokenAccountAndMint<'a, 'b>,
         pub market_authority: Option<&'a AccountInfo<'b>>,
@@ -1658,7 +1658,7 @@ pub(crate) mod account_parser {
         ) -> DexResult<Self> {
             check_assert!(accounts.len() >= 10 && accounts.len() <= 13)?;
             let (
-                unchecked_serum_dex_accounts,
+                unchecked_openbook_dex_accounts,
                 unchecked_vaults,
                 unchecked_mints,
                 unchecked_rent,
@@ -1686,7 +1686,7 @@ pub(crate) mod account_parser {
             }
 
             let mut checked_vaults = [None, None];
-            for account in unchecked_serum_dex_accounts {
+            for account in unchecked_openbook_dex_accounts {
                 check_assert_eq!(account.owner, program_id)?;
                 let data = account.try_borrow_data()?;
                 check_assert_eq!(data.len() % 8, 4)?;
@@ -1696,10 +1696,10 @@ pub(crate) mod account_parser {
                 check_assert_eq!(*header, [0u8; 8])?;
                 check_assert_eq!(*padding7, [0u8; 7])?;
             }
-            let serum_dex_accounts = unchecked_serum_dex_accounts;
+            let openbook_dex_accounts = unchecked_openbook_dex_accounts;
             let vault_owner_key_bytes = gen_vault_signer_key(
                 instruction.vault_signer_nonce,
-                serum_dex_accounts[0].key,
+                openbook_dex_accounts[0].key,
                 program_id,
             )?
             .to_bytes();
@@ -1730,7 +1730,7 @@ pub(crate) mod account_parser {
             Ok(InitializeMarketArgs {
                 program_id,
                 instruction,
-                serum_dex_accounts,
+                openbook_dex_accounts,
                 coin_vault_and_mint,
                 pc_vault_and_mint,
                 market_authority,
@@ -1740,23 +1740,23 @@ pub(crate) mod account_parser {
         }
 
         pub fn get_market(&self) -> &'a AccountInfo<'b> {
-            &self.serum_dex_accounts[0]
+            &self.openbook_dex_accounts[0]
         }
 
         pub fn get_req_q(&self) -> &'a AccountInfo<'b> {
-            &self.serum_dex_accounts[1]
+            &self.openbook_dex_accounts[1]
         }
 
         pub fn get_event_q(&self) -> &'a AccountInfo<'b> {
-            &self.serum_dex_accounts[2]
+            &self.openbook_dex_accounts[2]
         }
 
         pub fn get_bids(&self) -> &'a AccountInfo<'b> {
-            &self.serum_dex_accounts[3]
+            &self.openbook_dex_accounts[3]
         }
 
         pub fn get_asks(&self) -> &'a AccountInfo<'b> {
-            &self.serum_dex_accounts[4]
+            &self.openbook_dex_accounts[4]
         }
     }
 
@@ -2931,7 +2931,7 @@ impl State {
                 &mut event_q,
             ) {
                 // Cancel returns OrderNotFound when the order isn't in bids or
-                // asks. In this case, no Serum state is modified so it is safe
+                // asks. In this case, no Openbook state is modified so it is safe
                 // to continue. Any other type of error could be accompanied by
                 // a partial state change, so we must error. For example, if the
                 // event queue is full, we should abort to prevent the cancelled

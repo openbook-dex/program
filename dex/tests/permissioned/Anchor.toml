@@ -7,7 +7,7 @@ permissioned_markets = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [[test.genesis]]
 address = "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"
-program = "../../target/deploy/serum_dex.so"
+program = "../../target/deploy/openbook_dex.so"
 
 [scripts]
 test = "npx mocha -t 1000000 tests/"

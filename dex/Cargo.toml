@@ -1,11 +1,11 @@
 [package]
-name = "serum_dex"
+name = "openbook_dex"
 version = "0.5.10"
-description = "Serum DEX"
-repository = "https://github.com/project-serum/serum-dex"
+description = "Openbook DEX"
+repository = "https://github.com/openbook-dex/program"
 edition = "2018"
 license = "Apache-2.0"
-authors = ["Serum Foundation <foundation@projectserum.com>"]
+authors = ["Openbook Maintainers <contact@openbook-solana.com>"]
 
 [features]
 program = []

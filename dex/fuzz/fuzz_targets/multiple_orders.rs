@@ -14,13 +14,13 @@ use lazy_static::lazy_static;
 use libfuzzer_sys::fuzz_target;
 use solana_program::account_info::AccountInfo;
 
-use serum_dex::error::{DexError, DexErrorCode};
-use serum_dex::instruction::{
+use openbook_dex::error::{DexError, DexErrorCode};
+use openbook_dex::instruction::{
     CancelOrderInstructionV2, MarketInstruction, NewOrderInstructionV3, SelfTradeBehavior,
 };
-use serum_dex::matching::Side;
-use serum_dex::state::{strip_header, Market, OpenOrders, ToAlignedBytes};
-use serum_dex_fuzz::{
+use openbook_dex::matching::Side;
+use openbook_dex::state::{strip_header, Market, OpenOrders, ToAlignedBytes};
+use openbook_dex_fuzz::{
     get_token_account_balance, new_dex_owned_account_with_lamports, new_sol_account,
     new_token_account, process_instruction, setup_market, MarketAccounts, NoSolLoggingStubs,
     COIN_LOT_SIZE, PC_LOT_SIZE,
@@ -245,7 +245,7 @@ fn run_actions(seq: ActionSequence) {
             market_accounts
                 .open_orders_authority
                 .as_ref()
-                .map(|acc| serum_dex::state::fuzz_account_parser::SignerAccount::new(acc).unwrap()),
+                .map(|acc| openbook_dex::state::fuzz_account_parser::SignerAccount::new(acc).unwrap()),
         );
         let open_orders = match load_orders_result {
             Err(e) if e == DexErrorCode::RentNotProvided.into() => {

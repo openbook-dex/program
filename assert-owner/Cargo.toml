@@ -1,9 +1,9 @@
 # Note: This crate must be built using do.sh
 
 [package]
-name = "serum_assert_owner"
+name = "openbook_assert_owner"
 version = "0.1.0"
-repository = "https://github.com/project-serum/serum-dex"
+repository = "https://github.com/openbook-dex/program"
 edition = "2018"
 
 [dependencies]
@@ -11,6 +11,6 @@ solana-program = "1.10.41"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "serum_assert_owner"
+name = "openbook_assert_owner"
 
 [dev-dependencies]

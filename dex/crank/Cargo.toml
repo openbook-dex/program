@@ -8,8 +8,8 @@ name = "crank"
 path = "src/bin/main.rs"
 
 [dependencies]
-serum_dex = { path = "../", default-features = false, features = ["client", "program"] }
-serum-common = { path = "../../common", features = ["client"] }
+openbook_dex = { path = "../", default-features = false, features = ["client", "program"] }
+openbook-common = { path = "../../common", features = ["client"] }
 spl-token = { version = "3.5.0", features = ["no-entrypoint"], default-features = false }
 clap = { version = "4.0.29", features = ["derive"] }
 enumflags2 = "0.6.4"

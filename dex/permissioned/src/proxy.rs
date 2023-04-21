@@ -3,10 +3,10 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_spl::dex;
-use serum_dex::instruction::*;
+use openbook_dex::instruction::*;
 
 /// MarketProxy provides an abstraction for implementing proxy programs to the
-/// Serum orderbook, allowing one to implement a middleware for the purposes
+/// Openbook orderbook, allowing one to implement a middleware for the purposes
 /// of intercepting and modifying requests before being relayed to the
 /// orderbook.
 ///
@@ -41,7 +41,7 @@ impl<'a> MarketProxy<'a> {
     ) -> ProgramResult {
         let mut ix_data = data;
 
-        // First account is the Serum DEX executable--used for CPI.
+        // First account is the Openbook DEX executable--used for CPI.
         let dex = &accounts[0];
         require!(dex.key == &dex::ID, ErrorCode::InvalidTargetProgram);
         let acc_infos = (accounts[1..]).to_vec();

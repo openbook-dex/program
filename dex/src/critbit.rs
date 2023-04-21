@@ -288,7 +288,7 @@ impl Slab {
     /// ```compile_fail
     /// let slab = {
     ///     let mut bytes = [10; 100];
-    ///     serum_dex::critbit::Slab::new(&mut bytes)
+    ///     openbook_dex::critbit::Slab::new(&mut bytes)
     /// };
     /// ```
     #[inline]

@@ -1,8 +1,8 @@
 [package]
-name = "serum-common"
+name = "openbook-common"
 version = "0.1.0"
-description = "Serum common utilities"
-repository = "https://github.com/project-serum/serum-dex"
+description = "Openbook common utilities"
+repository = "https://github.com/openbook-dex/program"
 edition = "2018"
 
 [features]

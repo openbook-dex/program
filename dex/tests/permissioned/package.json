@@ -1,7 +1,7 @@
 {
   "name": "permissioned-markets",
   "version": "1.0.0",
-  "description": "This repo demonstrates how to create \"permissioned markets\" on Serum via a proxy smart contract. A permissioned market is a regular Serum market with an additional open orders authority, which must sign every transaction to create an open orders account.",
+  "description": "This repo demonstrates how to create \"permissioned markets\" on Openbook via a proxy smart contract. A permissioned market is a regular Openbook market with an additional open orders authority, which must sign every transaction to create an open orders account.",
   "main": "index.js",
   "directories": {
     "test": "tests"

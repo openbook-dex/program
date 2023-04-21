@@ -8,7 +8,7 @@ CLUSTER_URL=http://localhost:8899
 PROGRAM_ID="2SXFv8tTmavm8uSAg3ft1JjttzJvgwXZiUPa9xuUbqH2"
 
 #
-# Assumes the current working directory is top-level serum-dex dir.
+# Assumes the current working directory is top-level program dir.
 #
 main() {
     set +e
@@ -19,7 +19,7 @@ main() {
     #
     # Start the local validator.
     #
-    solana-test-validator --bpf-program $PROGRAM_ID dex/target/deploy/serum_dex.so > validator.log &
+    solana-test-validator --bpf-program $PROGRAM_ID dex/target/deploy/openbook_dex.so > validator.log &
     #
     # Wait for the validator to start.
     #

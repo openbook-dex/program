@@ -17,9 +17,9 @@ use solana_program::sysvar::Sysvar;
 use spl_token::state::Account as SplAccount;
 use spl_token::state::Mint;
 
-use serum_dex::error::DexResult;
-use serum_dex::instruction::{fee_sweeper, initialize_market};
-use serum_dex::state::{
+use openbook_dex::error::DexResult;
+use openbook_dex::instruction::{fee_sweeper, initialize_market};
+use openbook_dex::state::{
     gen_vault_signer_key, strip_header, EventQueue, MarketState, MarketStateV2, Queue,
     RequestQueue, State,
 };

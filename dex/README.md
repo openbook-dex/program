@@ -19,7 +19,7 @@ cargo build --relase dex
 ### Deploy the dex to the configured solana cluster
 
 ```bash
-DEX_PROGRAM_ID="$(solana deploy ./target/bpfel-unknown-unknown/release/serum_dex.so | jq .programId -r)"
+DEX_PROGRAM_ID="$(solana deploy ./target/bpfel-unknown-unknown/release/openbook_dex.so | jq .programId -r)"
 ```
 
 ## Run the fuzz tests
@@ -80,7 +80,7 @@ NDEBUG=1 ./run.sh
 solana config set -u http://127.0.0.1:8899
 solana-keygen new
 solana airdrop 100
-DEX_PROGRAM_ID="$(solana deploy dex/target/bpfel-unknown-unknown/release/serum_dex.so | jq .programId -r)"
+DEX_PROGRAM_ID="$(solana deploy dex/target/bpfel-unknown-unknown/release/openbook_dex.so | jq .programId -r)"
 CLUSTER=localnet
 KEYPAIR=~/.config/solana/id.json
 

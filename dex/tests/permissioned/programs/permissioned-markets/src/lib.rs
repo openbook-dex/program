@@ -1,10 +1,10 @@
-// Note. This example depends on unreleased Serum DEX changes.
+// Note. This example depends on unreleased Openbook DEX changes.
 
 use anchor_lang::prelude::*;
-use serum_dex_permissioned::serum_dex::instruction::{
+use openbook_dex_permissioned::openbook_dex::instruction::{
     CancelOrderInstructionV2, NewOrderInstructionV3,
 };
-use serum_dex_permissioned::{
+use openbook_dex_permissioned::{
     Context, Logger, MarketMiddleware, MarketProxy, OpenOrdersPda, ReferralFees,
 };
 use solana_program::account_info::AccountInfo;
@@ -16,8 +16,8 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 /// # Permissioned Markets
 ///
-/// This demonstrates how to create "permissioned markets" on Serum via a proxy.
-/// A permissioned market is a regular Serum market with an additional
+/// This demonstrates how to create "permissioned markets" on Openbook via a proxy.
+/// A permissioned market is a regular Openbook market with an additional
 /// open orders authority, which must sign every transaction to create an open
 /// orders account.
 ///
