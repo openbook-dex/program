@@ -1,8 +1,6 @@
 # Openbook DEX
 
-## Deploying the DEX
-
-Run these commands from the repository's dex directory.
+## Testing 
 
 ### Run unit tests
 
@@ -10,23 +8,47 @@ Run these commands from the repository's dex directory.
 cargo test
 ```
 
-### Compile the dex binary
-
-```bash
-cargo build --relase dex
-```
-
-### Deploy the dex to the configured solana cluster
-
-```bash
-DEX_PROGRAM_ID="$(solana deploy ./target/bpfel-unknown-unknown/release/serum_dex.so | jq .programId -r)"
-```
-
-## Run the fuzz tests
+## Run fuzz tests
 
 ```bash
 cargo install cargo-fuzz
 cargo fuzz run multiple_orders
+```
+
+If this doesn't work, you may need to switch to the nightly version of the Rust compiler:
+
+```bash
+rustup toolchain install nightly
+rustup override set nightly
+```
+
+## Deploying
+
+### Compiling
+
+```bash
+cargo build-bpf
+```
+
+### Deploying locally
+
+```bash
+solana config set -u localhost
+solana-test-validator
+# generate a key & give yourself some SOL if you haven't already
+solana-keygen new
+solana airdrop 100
+solana program deploy target/deploy/serum_dex.so
+```
+
+### Deploying remotely
+
+```
+solana config set -u devnet # options are mainnet-beta, testnet, & devnet
+# verify that you have SOL balances for gas
+KEYPAIR=~/.config/solana/id.json
+solana balance -k $KEYPAIR
+solana program deploy target/deploy/serum_dex.so
 ```
 
 ## Using the crank client utility
@@ -52,38 +74,4 @@ cargo run -- $CLUSTER whole-shebang $KEYPAIR $DEX_PROGRAM_ID
 COIN_MINT="..."
 PRICE_CURRENCY_MINT="..."
 cargo run -- $CLUSTER list-market $KEYPAIR $DEX_PROGRAM_ID --coin-mint $COIN_MINT --pc-mint $PRICE_CURRENCY_MINT
-```
-
-## First-time setup
-
-```bash
-# Building the dex
-sudo apt-get install -y pkg-config build-essential python3-pip jq
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
-curl -sSf https://raw.githubusercontent.com/solana-labs/solana/v1.4.14/install/solana-install-init.sh | sh -s - v1.4.14
-export PATH="/home/ubuntu/.local/share/solana/install/active_release/bin:$PATH"
-
-git clone https://github.com/openbook-dex/program
-cd dex
-cargo build --release
-
-# run a solana cluster. in a new shell:
-git clone https://github.com/solana-labs/solana --branch v1.4.14
-cd solana
-sudo apt-get install -y libssl-dev libudev-dev zlib1g-dev llvm clang
-cargo build --release
-export RUST_LOG=solana_runtime::system_instruction_processor=trace,solana_runtime::message_processor=info,solana_bpf_loader=debug,solana_rbpf=debug
-NDEBUG=1 ./run.sh
-
-# Deploy the dex to our cluster (in the old shell)
-solana config set -u http://127.0.0.1:8899
-solana-keygen new
-solana airdrop 100
-DEX_PROGRAM_ID="$(solana deploy dex/target/bpfel-unknown-unknown/release/serum_dex.so | jq .programId -r)"
-CLUSTER=localnet
-KEYPAIR=~/.config/solana/id.json
-
-# run the demo script (this is mostly a smoke test)
-cargo run -- $CLUSTER whole-shebang $KEYPAIR $DEX_PROGRAM_ID
 ```
