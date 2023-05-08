@@ -81,8 +81,8 @@ impl FeeTier {
     fn maker_rate(self) -> U64F64 {
         use FeeTier::*;
         match self {
-            Stable => fee_tenth_of_bps(5),
-            Base | _ => fee_tenth_of_bps(20),
+            Stable => fee_tenth_of_bps(0),
+            Base | _ => fee_tenth_of_bps(0),
         }
     }
 
@@ -93,7 +93,7 @@ impl FeeTier {
     }
 
     fn taker_rate(self) -> U64F64 {
-        self.maker_rate().mul_u64(2)
+        self.maker_rate().mul_u64(0)
     }
 
     #[inline]
