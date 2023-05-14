@@ -577,7 +577,7 @@ pub struct InitAccount<'info> {
         seeds = [b"open-orders", dex_program.key.as_ref(), market.key.as_ref(), authority.key.as_ref()],
         bump,
         payer = authority,
-        owner = psy_open_book::ID,
+        owner = *dex_program.key,
         space = size_of::<OpenOrders>() + SERUM_PADDING,
     )]
     pub open_orders: AccountInfo<'info>,
