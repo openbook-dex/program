@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::instruction::Instruction;
 use anchor_lang::solana_program::system_program;
 use anchor_lang::Accounts;
-use anchor_spl::token;
+use anchor_spl::{token, dex};
 use serum_dex::instruction::*;
 use serum_dex::matching::Side;
 use serum_dex::state::OpenOrders;
@@ -173,7 +173,7 @@ impl MarketMiddleware for OpenOrdersPda {
 
         // Initialize PDA.
         let mut accounts = &ctx.accounts[..];
-        let mut bumps = std::collections::BTreeMap::new();
+        let mut bumps: std::collections::BTreeMap<String, u8> = std::collections::BTreeMap::new();
         let mut realloc_accounts = std::collections::BTreeSet::new();
 
         InitAccount::try_accounts(ctx.program_id, &mut accounts, &[self.bump, self.bump_init], &mut bumps, &mut realloc_accounts)?;
@@ -478,6 +478,15 @@ impl MarketMiddleware for ReferralFees {
     }
 }
 
+///
+/// Returns true if the dex_id is recognized, false otherwise.
+pub fn is_valid_dex_id(dex_id: &Pubkey) -> bool {
+    if dex_id == &psy_open_book::ID || dex_id == &dex::ID {
+        return true
+    }
+    false
+}
+
 // Macros.
 
 /// Returns the seeds used for a user's open orders account PDA.
@@ -568,7 +577,7 @@ pub enum ErrorCode {
 #[derive(Accounts)]
 #[instruction(bump: u8, bump_init: u8)]
 pub struct InitAccount<'info> {
-    #[account(address = psy_open_book::ID)]
+    #[account(constraint = is_valid_dex_id(dex_program.key) @ ErrorCode::InvalidTargetProgram)]
     pub dex_program: AccountInfo<'info>,
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
