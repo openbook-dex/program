@@ -31,12 +31,12 @@ pub mod msrm_token {
 
 pub mod disable_authority {
     use solana_program::declare_id;
-    declare_id!("HRVqEcCRZcPxpUBRH7E8YyftuH9UfbJMm3fTjvjrjHXv");
+    declare_id!("BSwuYLRunFLt8ynyKkZKna6KzbBvFP9DKVR1c6nEQoZH");
 }
 
 pub mod fee_sweeper {
     use solana_program::declare_id;
-    declare_id!("HRVqEcCRZcPxpUBRH7E8YyftuH9UfbJMm3fTjvjrjHXv");
+    declare_id!("BSwuYLRunFLt8ynyKkZKna6KzbBvFP9DKVR1c6nEQoZH");
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]

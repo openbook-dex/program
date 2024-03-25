@@ -40,13 +40,13 @@ use {default_env::default_env, solana_security_txt::security_txt};
 security_txt! {
     // Required fields
     name: "OpenBook DEX",
-    project_url: "https://github.com/openbook-dex",
-    contacts: "link:https://github.com/openbook-dex/program/security/advisories/new",
-    policy: "https://raw.githubusercontent.com/openbook-dex/program/master/SECURITY.md",
+    project_url: "https://github.com/openbook-market",
+    contacts: "link:https://github.com/openbook-market/program/security/advisories/new",
+    policy: "https://raw.githubusercontent.com/openbook-market/program/master/SECURITY.md",
 
     // Optional Fields
     preferred_languages: "en",
-    source_code: "https://github.com/openbook-dex/program",
+    source_code: "https://github.com/openbook-market/program",
     source_revision: default_env!("GITHUB_SHA", "unknown source revision"),
     source_release: default_env!("GITHUB_REF_NAME", "unknown source release")
 }
